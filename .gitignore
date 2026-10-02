@@ -1,0 +1,31 @@
+# dependências e builds
+node_modules/
+dist/
+build/
+coverage/
+
+# ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# banco local de desenvolvimento
+backend/data/
+*.sqlite
+*.sqlite3
+
+# planilhas importadas (podem conter dados pessoais — nunca versionar)
+*.csv
+*.xlsx
+*.xls
+
+# áudio em revisão
+*.m4a
+*.mp3
+
+# sistema / editores
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

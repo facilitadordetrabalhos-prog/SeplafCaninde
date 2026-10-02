@@ -1,0 +1,15 @@
+{
+  "name": "seplaf-caninde",
+  "private": true,
+  "description": "Portal da Secretaria de Finanças de Canindé/CE — Reforma Tributária, NFS-e Nacional, dúvidas e serviços online",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "instalar": "npm --prefix backend install && npm --prefix frontend install",
+    "build": "npm --prefix frontend install --include=dev && npm --prefix frontend run build && npm --prefix backend install --include=dev && npm --prefix backend run build",
+    "start": "node backend/dist/main.js",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "dev:frontend": "npm --prefix frontend run dev"
+  }
+}

@@ -1,0 +1,2388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finanças Canindé — protótipo de telas</title>
+<style>
+  :root{
+    /* Identidade "Canindé — O trabalho que transforma" */
+    --laranja:#e86f00;        /* principal (texto branco por cima) */
+    --laranja-vivo:#f39200;
+    --amarelo:#ffcc00;
+    --amarelo-claro:#fff6d6;
+    --creme:#fffaf0;
+    --preto:#1d1d1b;
+    --verde-brasao:#1e6b34;
+    --tinta:#1f2328;
+    --tinta-fraca:#5f6670;
+    --linha:#ece5d8;
+    --fundo:#faf7f2;
+    --card:#ffffff;
+    --ok:#1e6b34;      --ok-bg:#e3f3e6;
+    --espera:#9a5b00;  --espera-bg:#fff0cc;
+    --parado:#6b7280;  --parado-bg:#f1efeb;
+    --erro:#b42318;    --erro-bg:#fde5e2;
+    --azul:#1d5fa8;    --azul-bg:#e6f0fa;
+    --raio:12px;
+    --sombra:0 1px 3px rgba(60,40,10,.08), 0 1px 2px rgba(60,40,10,.04);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fundo);color:var(--tinta);
+       font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit}
+
+  /* ---------- barra de protótipo ---------- */
+  .proto{background:#111;color:#cbd5e1;font-size:12.5px;padding:7px 16px;display:flex;
+         gap:6px;flex-wrap:wrap;align-items:center}
+  .proto b{color:#fff;margin-right:8px}
+  .proto button{background:#222;color:#e5e7eb;border:1px solid #3a3a3a;border-radius:6px;
+                padding:4px 10px;font-size:12px;cursor:pointer}
+  .proto button.ativo{background:var(--amarelo);color:#111;border-color:var(--amarelo);font-weight:600}
+  .proto .sep{width:1px;height:18px;background:#3a3a3a;margin:0 6px}
+
+  /* ---------- faixas ilustradas (arte oficial) ---------- */
+  .faixa-topo{height:46px;background:url(img/moldura.png) repeat-x 0 -34px / 1080px auto}
+  .faixa-rodape{height:112px;background:url(img/moldura.png) repeat-x left bottom / 1080px auto}
+
+  /* ---------- topo ---------- */
+  .topo{background:#fff;border-bottom:4px solid var(--laranja-vivo);display:flex;align-items:center;
+        justify-content:space-between;padding:10px 22px;gap:16px;position:sticky;top:0;z-index:20}
+  .topo img{height:50px;display:block;min-width:0;max-width:100%;object-fit:contain;object-position:left}
+  .topo-acoes{display:flex;gap:10px;font-size:13.5px;align-items:center;color:var(--tinta-fraca)}
+  .topo-acoes .link{cursor:pointer}
+  .cracha{background:var(--preto);color:#fff;border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .cracha.equipe{background:var(--laranja)}
+
+  /* ---------- estrutura ---------- */
+  .estrutura{display:flex;min-height:calc(100vh - 160px)}
+  .lateral{width:240px;flex:none;background:#fff;border-right:1px solid var(--linha);padding:14px 12px}
+  .busca{display:flex;align-items:center;gap:8px;border:1px solid var(--linha);border-radius:8px;
+         padding:8px 10px;background:var(--fundo);margin-bottom:14px}
+  .busca input{border:0;outline:0;width:100%;font-size:13px;color:var(--tinta);background:none}
+  .menu{display:flex;flex-direction:column;gap:2px}
+  .menu a{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:8px;
+          font-size:13.5px;color:#3b3b3b;cursor:pointer}
+  .menu a:hover{background:var(--amarelo-claro)}
+  .menu a.ativo{background:var(--laranja);color:#fff;font-weight:600}
+  .menu a.off{color:#a3a3a3;cursor:default}
+  .menu a.off:hover{background:none}
+  .menu .rotulo{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:#b08a4a;
+                padding:14px 11px 5px;font-weight:700}
+  .menu .breve{margin-left:auto;font-size:10px;background:var(--parado-bg);color:var(--parado);
+               border-radius:999px;padding:1px 7px}
+  .menu .novo{margin-left:auto;font-size:10px;background:var(--erro);color:#fff;border-radius:999px;padding:1px 7px;font-weight:700}
+  .conteudo{flex:1;padding:22px 26px 50px;min-width:0}
+  .tela{display:none}
+  .tela.ativa{display:block}
+
+  /* ---------- banners ---------- */
+  .banner{border-radius:var(--raio);padding:26px 30px;color:#fff;margin-bottom:16px;
+          display:flex;align-items:center;gap:20px;position:relative;overflow:hidden;
+          background:linear-gradient(100deg,var(--laranja) 0%,var(--laranja-vivo) 70%,#f7b500 100%)}
+  .banner::after{content:"";position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;
+                 background:rgba(255,255,255,.10)}
+  .banner.escuro{background:linear-gradient(100deg,#1d1d1b,#3a332a)}
+  .banner.escuro::after{background:rgba(243,146,0,.18)}
+  .banner h1{margin:0 0 6px;font-size:27px;letter-spacing:-.3px;line-height:1.2}
+  .banner p{margin:0;opacity:.95;font-size:14.5px;max-width:68ch}
+  .banner .icone{width:52px;height:52px;flex:none;opacity:.95}
+  .banner>div{min-width:0}
+  .faixa-slogan{display:inline-flex;flex-wrap:wrap;row-gap:6px;gap:6px;align-items:center;margin-bottom:10px;font-weight:800;
+                font-style:italic;font-size:12px;letter-spacing:.3px}
+  .faixa-slogan span{background:var(--preto);color:#fff;padding:2px 8px;transform:skewX(-12deg);white-space:nowrap}
+  .faixa-slogan span.am{background:var(--amarelo);color:#111}
+
+  .trilha{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+          padding:11px 16px;font-size:13px;color:var(--tinta-fraca);margin-bottom:18px}
+  .trilha b{color:var(--laranja);font-weight:600}
+
+  /* ---------- prazos ---------- */
+  .prazos{background:#fff;border:1px solid #f3d38a;border-left:6px solid var(--amarelo);border-radius:var(--raio);
+          padding:16px 18px;margin-bottom:18px}
+  .prazos-cab{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .prazos-cab h3{margin:0;font-size:16px}
+  .prazos-grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+  .prazo{border:1px solid var(--linha);border-radius:10px;padding:12px 14px;background:var(--creme)}
+  .prazo .dias{font-size:24px;font-weight:800;color:var(--laranja);letter-spacing:-.5px;line-height:1.1}
+  .prazo .dias small{font-size:12px;font-weight:600;color:var(--tinta-fraca);letter-spacing:0}
+  .prazo .dias.fim{color:var(--parado);font-size:16px}
+  .prazo h4{margin:4px 0 2px;font-size:13.5px}
+  .prazo p{margin:0;font-size:12.5px;color:var(--tinta-fraca)}
+
+  /* ---------- etiquetas ---------- */
+  .tag{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:2px 9px;white-space:nowrap}
+  .tag.lar{background:#ffe8cc;color:#9a4a00}
+  .tag.ok{background:var(--ok-bg);color:var(--ok)}
+  .tag.espera{background:var(--espera-bg);color:var(--espera)}
+  .tag.parado{background:var(--parado-bg);color:var(--parado)}
+  .tag.erro{background:var(--erro-bg);color:var(--erro)}
+  .tag.azul{background:var(--azul-bg);color:var(--azul)}
+  .tag.oficial{background:var(--azul);color:#fff}
+
+  /* ---------- seções ---------- */
+  h2.secao{font-size:20px;margin:28px 0 4px;display:flex;align-items:center;gap:10px}
+  h2.secao::before{content:"";width:6px;height:22px;border-radius:3px;background:linear-gradient(var(--laranja),var(--amarelo))}
+  .sub{color:var(--tinta-fraca);font-size:13.5px;margin:0 0 16px}
+  .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+  .servico{background:var(--card);border:1px solid var(--linha);border-radius:var(--raio);
+           padding:20px;box-shadow:var(--sombra);display:flex;flex-direction:column;border-top:4px solid var(--laranja-vivo)}
+  .servico .quadro{width:46px;height:46px;border-radius:10px;background:var(--amarelo-claro);
+                   color:var(--laranja);display:grid;place-items:center;margin-bottom:14px}
+  .servico h3{margin:0 0 6px;font-size:15.5px}
+  .servico p{margin:0 0 14px;font-size:13px;color:var(--tinta-fraca);line-height:1.45}
+  .servico.off{opacity:.6;border-style:dashed;border-top:1px dashed var(--linha);box-shadow:none}
+  .botao{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--laranja);
+         color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:13.5px;font-weight:600;
+         cursor:pointer;margin-top:auto;width:fit-content}
+  .botao.preto{background:var(--preto)}
+  .botao.vazio{background:#fff;color:#3b3b3b;border:1px solid var(--linha)}
+  .botao.peq{padding:7px 13px;font-size:12.5px}
+
+  /* ---------- notícias oficiais ---------- */
+  .duas{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+  .duas.larga{grid-template-columns:1fr 430px}
+  .duas.meio{grid-template-columns:1fr 1fr}
+  .noticias{display:flex;flex-direction:column;gap:10px}
+  .noticia{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:14px 16px;box-shadow:var(--sombra)}
+  .noticia .meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--tinta-fraca);margin-bottom:5px;flex-wrap:wrap}
+  .noticia h4{margin:0 0 4px;font-size:15px;line-height:1.35}
+  .noticia p{margin:0;font-size:13px;color:var(--tinta-fraca)}
+  .noticia .canindé, .noticia .local{margin-top:10px;background:var(--amarelo-claro);border-radius:8px;padding:9px 12px;font-size:13px;color:#4a3a1a}
+  .noticia .local b{color:#9a4a00}
+  .noticia .rodape{display:flex;gap:14px;margin-top:10px;font-size:12.5px;align-items:center}
+  .noticia .rodape a{color:var(--azul);font-weight:600;cursor:pointer}
+  .sinc{font-size:12px;color:var(--tinta-fraca);display:flex;align-items:center;gap:6px}
+  .sinc::before{content:"";width:8px;height:8px;border-radius:50%;background:#22a447;box-shadow:0 0 0 3px #d6f2dc}
+  .filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .chip{border:1px solid var(--linha);background:#fff;border-radius:999px;padding:6px 13px;
+        font-size:13px;cursor:pointer;color:#3b3b3b}
+  .chip.ativo{background:var(--preto);border-color:var(--preto);color:#fff}
+
+  .caixa-lateral{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:16px 18px;margin-bottom:14px}
+  .caixa-lateral h4{margin:0 0 8px;font-size:14.5px}
+  .caixa-lateral p,.caixa-lateral li{font-size:13px;color:var(--tinta-fraca)}
+  .caixa-lateral ul{padding-left:18px;margin:6px 0}
+
+  /* ---------- passos ---------- */
+  .passos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+  .passo{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:18px;text-align:center}
+  .passo .n{width:34px;height:34px;border-radius:50%;background:var(--amarelo);color:#111;font-weight:800;
+            display:grid;place-items:center;margin:0 auto 10px}
+  .passo h4{margin:0 0 4px;font-size:14.5px}
+  .passo p{margin:0;font-size:12.5px;color:var(--tinta-fraca)}
+
+  /* ---------- cronograma ---------- */
+  .crono{position:relative;padding-left:28px}
+  .crono::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:#f0d9ae}
+  .marco{position:relative;background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+         padding:16px 18px;margin-bottom:14px;box-shadow:var(--sombra)}
+  .marco::before{content:"";position:absolute;left:-25px;top:20px;width:12px;height:12px;border-radius:50%;
+                 background:#fff;border:3px solid var(--laranja-vivo)}
+  .marco.agora{border-color:var(--amarelo);background:var(--creme)}
+  .marco.agora::before{background:var(--amarelo);border-color:var(--laranja)}
+  .marco h3{margin:0 0 4px;font-size:16px;display:flex;gap:10px;align-items:center}
+  .marco ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;color:#333}
+  .marco .iss{margin-top:10px;background:var(--amarelo-claro);border-radius:8px;padding:9px 12px;font-size:13px}
+  .marco .iss b{color:#9a4a00}
+
+  /* ---------- base oficial ---------- */
+  .base{display:block;padding-left:30px !important;position:relative;background:var(--azul-bg);border-radius:8px;padding:10px 12px;
+        font-size:12.5px;color:#1e3a5f;margin-top:10px}
+  .base::before{content:"§";font-weight:800;color:var(--azul);font-size:15px;line-height:1.2;position:absolute;left:12px;top:9px}
+  .base a{color:var(--azul);font-weight:600;text-decoration:underline}
+
+  /* ---------- FAQ ---------- */
+  .busca-grande{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--linha);
+                border-radius:var(--raio);padding:12px 14px;margin-bottom:12px}
+  .busca-grande{flex-wrap:wrap}
+  .busca-grande input{border:0;outline:0;flex:1;font-size:15px;min-width:0}
+  details.faq{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);margin-bottom:8px}
+  details.faq summary{cursor:pointer;padding:14px 16px;font-weight:600;font-size:14.5px;list-style:none;
+                      display:flex;gap:10px;align-items:center}
+  details.faq summary::-webkit-details-marker{display:none}
+  details.faq summary::before{content:"+";width:20px;height:20px;border-radius:50%;background:var(--amarelo);
+                              color:#111;display:grid;place-items:center;flex:none;font-weight:800}
+  details.faq[open] summary::before{content:"–"}
+  details.faq summary .tag{margin-left:auto;font-weight:500}
+  details.faq .resp{padding:0 16px 14px 46px;font-size:14px;color:#333}
+  details.faq .resp .rodape{font-size:12px;color:var(--tinta-fraca);margin-top:8px;display:flex;gap:14px}
+
+  /* ---------- formulário ---------- */
+  .form-card{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+             overflow:hidden;box-shadow:var(--sombra)}
+  .form-card .cabeca{background:var(--preto);color:#fff;padding:13px 18px;font-weight:600;font-size:15px;
+                     border-bottom:4px solid var(--amarelo)}
+  .form-card .corpo{padding:18px}
+  .campo{margin-bottom:12px}
+  .campo label{display:block;font-size:12.5px;color:var(--tinta-fraca);margin-bottom:5px}
+  .campo input,.campo textarea,.campo select{width:100%;border:1px solid var(--linha);border-radius:7px;
+               padding:10px 12px;font-size:14px;outline:0;background:#fffdf9;font-family:inherit}
+  .campo input:focus,.campo textarea:focus{border-color:var(--laranja-vivo)}
+  .campo textarea{min-height:96px;resize:vertical}
+  .check{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:#333;margin-bottom:12px}
+  .check input{margin-top:3px;accent-color:var(--laranja)}
+  .sucesso{display:none;background:var(--ok-bg);color:#14532d;border-radius:8px;padding:12px 14px;font-size:13.5px;margin-top:10px}
+  .sucesso b{font-size:16px;letter-spacing:.5px}
+
+  /* ---------- vídeos e materiais ---------- */
+  .videos{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+  .video{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);overflow:hidden;box-shadow:var(--sombra)}
+  .thumb{aspect-ratio:16/9;display:grid;place-items:center;position:relative;color:#fff}
+  .thumb .play{width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.45);display:grid;place-items:center}
+  .thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.65);font-size:11.5px;border-radius:4px;padding:1px 6px}
+  .thumb .ord{position:absolute;left:8px;top:8px;background:var(--amarelo);color:#111;font-size:11px;font-weight:700;border-radius:4px;padding:1px 7px}
+  .thumb .fonte{position:absolute;left:8px;bottom:8px;background:var(--azul);font-size:10.5px;font-weight:700;border-radius:4px;padding:1px 7px}
+  .thumb.slide{background:linear-gradient(135deg,#1d1d1b,#3a332a);text-align:center;padding:12px}
+  .thumb.slide b{font-size:17px;line-height:1.2;color:var(--amarelo)}
+  .video .info{padding:12px 14px}
+  .video h4{margin:0 0 6px;font-size:14px;line-height:1.35}
+  .video .meta{font-size:12px;color:var(--tinta-fraca);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+  /* ---------- artigo ---------- */
+  .artigo{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:28px 34px}
+  .artigo h1{font-size:26px;margin:8px 0 6px;letter-spacing:-.3px;line-height:1.25}
+  .artigo .por{font-size:12.5px;color:var(--tinta-fraca);margin-bottom:18px}
+  .artigo p,.artigo li{font-size:15px;line-height:1.65;color:#2a2f36}
+  .artigo h3{margin:22px 0 6px;font-size:17px}
+  .comparativo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  .comparativo div{border:1px solid var(--linha);border-radius:10px;padding:14px 16px}
+  .comparativo div:first-child{border-top:4px solid var(--amarelo)}
+  .comparativo div:last-child{border-top:4px solid var(--laranja)}
+  .comparativo h4{margin:0 0 6px;font-size:15px}
+  .comparativo ul{margin:0;padding-left:18px}
+  .comparativo li{font-size:13.5px}
+  .caixa-dica{background:var(--amarelo-claro);border-left:4px solid var(--amarelo);border-radius:6px;padding:12px 16px;margin:16px 0;font-size:14px}
+  .tabela-prazos{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+  .tabela-prazos td,.tabela-prazos th{border-bottom:1px solid var(--linha);padding:9px 10px;text-align:left}
+  .tabela-prazos th{font-size:11.5px;text-transform:uppercase;color:var(--tinta-fraca)}
+
+  /* ---------- entenda a reforma ---------- */
+  .bloco{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:22px 24px;margin-bottom:16px;box-shadow:var(--sombra)}
+  .bloco>h3{margin:0 0 4px;font-size:18px}
+  .bloco>.sub{margin-bottom:16px}
+  .iva{display:grid;grid-template-columns:auto 40px 1fr;gap:0 10px;align-items:center}
+  .antigos{display:flex;flex-direction:column;gap:6px}
+  .antigos span{border:1px solid var(--linha);background:var(--fundo);border-radius:6px;padding:5px 12px;font-size:13px;font-weight:600;text-align:center;min-width:150px}
+  .antigos small{font-weight:400;color:var(--tinta-fraca)}
+  .seta{font-size:26px;color:var(--laranja-vivo);text-align:center}
+  .novos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .novos div{border-radius:10px;padding:16px;color:#fff}
+  .novos b{display:block;font-size:26px;letter-spacing:-.5px}
+  .novos small{font-size:12.5px;opacity:.92}
+  .novos .cbs{background:var(--laranja)}
+  .novos .ibs{background:var(--preto)}
+  .novos .is{grid-column:1/-1;background:var(--amarelo-claro);color:#4a3a1a;padding:10px 14px;font-size:13px}
+  .pilares{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:14px}
+  .pilar{border:1px solid var(--linha);border-radius:10px;padding:16px;border-top:4px solid var(--amarelo)}
+  .pilar h4{margin:0 0 6px;font-size:15px}
+  .pilar p{margin:0;font-size:13.5px;color:#3b3b3b}
+  .nota-fiscal{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:var(--fundo);border:1px dashed #cfc6b5;border-radius:6px;padding:8px 10px;margin-top:10px}
+  .nota-fiscal b{color:var(--laranja)}
+  .cashback{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:14px}
+  .cb{border:1px solid var(--linha);border-radius:10px;padding:16px}
+  .cb .pct{display:flex;gap:16px;margin-bottom:8px}
+  .cb .pct div b{display:block;font-size:30px;font-weight:800;letter-spacing:-1px;color:var(--laranja);line-height:1}
+  .cb .pct div small{font-size:12px;color:var(--tinta-fraca)}
+  .cb h4{margin:0 0 4px;font-size:14.5px}
+  .cb p{margin:0;font-size:13px;color:#3b3b3b}
+  .grafico{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;align-items:end;height:220px;margin-top:8px}
+  .ano{display:flex;flex-direction:column;justify-content:flex-end;height:100%;text-align:center}
+  .ano .barra{display:flex;flex-direction:column;justify-content:flex-end;height:170px;border-radius:6px 6px 0 0;overflow:hidden}
+  .ano .barra i{display:block}
+  .ano .antigo{background:#8a8378}
+  .ano .novo{background:var(--laranja-vivo)}
+  .ano b{font-size:13px;margin-top:6px}
+  @media (max-width:700px){ .ano b{font-size:10.5px} .bloco{padding:18px 16px} }
+  .ano small{font-size:11px;color:var(--tinta-fraca);line-height:1.25;min-height:28px}
+  .legenda{display:flex;gap:16px;font-size:12.5px;color:var(--tinta-fraca);margin-top:10px;flex-wrap:wrap}
+  .legenda i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .destaque-local{background:var(--preto);color:#fff;border-radius:10px;padding:14px 16px;margin-top:14px;font-size:13.5px}
+  .destaque-local b{color:var(--amarelo)}
+  @media (max-width:700px){
+    .iva{grid-template-columns:1fr}
+    .seta{transform:rotate(90deg);margin:6px 0}
+    .grafico{gap:3px}
+    .ano small{display:none}
+  }
+
+  /* ---------- ambiente NFS-e Nacional ---------- */
+  .menu-nfse-cab{background:var(--preto);color:#fff;border-radius:10px;padding:12px 12px;margin-bottom:10px}
+  .menu-nfse-cab b{display:block;font-size:14.5px}
+  .menu-nfse-cab small{color:var(--amarelo);font-size:11.5px;font-weight:600}
+  .menu-nfse-cab a{display:block;color:#bbb;font-size:12px;margin-top:6px;cursor:pointer}
+  #menu-nfse a.ativo{background:var(--preto)}
+  .banner.nfse{background:linear-gradient(100deg,#1d1d1b 0%,#2e2a24 60%,#4a3a1a 100%);border-bottom:5px solid var(--amarelo)}
+  .banner.nfse::after{background:rgba(255,204,0,.12)}
+  .selo-nfse{display:inline-block;background:var(--amarelo);color:#111;font-weight:800;font-size:12px;border-radius:6px;padding:3px 9px;margin-bottom:10px;letter-spacing:.3px}
+  .contagem{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .contagem div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:8px 14px;font-size:12.5px}
+  .contagem b{display:block;font-size:20px;color:var(--amarelo)}
+  .perfis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:12px}
+  .perfil{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:16px;cursor:pointer;transition:.12s}
+  .perfil:hover{border-color:var(--laranja-vivo);box-shadow:0 4px 14px rgba(232,111,0,.12)}
+  .perfil.sel{border-color:var(--laranja);box-shadow:inset 0 0 0 2px var(--laranja)}
+  .perfil .ico{font-size:24px}
+  .perfil h4{margin:6px 0 4px;font-size:14.5px}
+  .perfil p{margin:0;font-size:12.5px;color:var(--tinta-fraca)}
+  .rota{display:none;background:var(--creme);border:1px solid #f3d38a;border-radius:var(--raio);padding:14px 18px;margin-top:12px;font-size:13.5px}
+  .rota ol{margin:6px 0 0;padding-left:20px}
+  .rota li{margin-bottom:4px}
+  .progresso{height:10px;background:#eee6d6;border-radius:999px;overflow:hidden;margin:6px 0 14px}
+  .progresso i{display:block;height:100%;background:linear-gradient(90deg,var(--laranja),var(--amarelo));transition:width .25s}
+  .checklist{display:flex;flex-direction:column;gap:8px}
+  .item-check{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--linha);border-radius:10px;padding:12px 14px;cursor:pointer}
+  .item-check input{width:18px;height:18px;margin-top:2px;accent-color:var(--ok);flex:none}
+  .item-check b{font-size:14px}
+  .item-check p{margin:2px 0 0;font-size:12.5px;color:var(--tinta-fraca)}
+  .item-check.feito{background:#f4fbf5;border-color:#bfe3c7}
+  .item-check.feito b{text-decoration:line-through;color:var(--ok)}
+  .item-check a{color:var(--laranja);font-weight:600;cursor:pointer}
+  .acessos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px}
+  .acesso{border:1px solid var(--linha);border-radius:10px;padding:14px 16px;background:#fff}
+  .acesso .nivel{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tinta-fraca)}
+  .acesso h4{margin:2px 0 6px;font-size:15px}
+  .acesso p,.acesso li{font-size:13px;color:#3b3b3b;margin:0}
+  .acesso ul{padding-left:18px;margin:6px 0 0}
+  .acesso.destaque{border:2px solid var(--amarelo);background:var(--creme)}
+  .passos-tab{display:flex;gap:0;margin-bottom:14px;border:1px solid var(--linha);border-radius:10px;overflow:hidden;background:#fff}
+  .passos-tab button{flex:1;border:0;background:#fff;padding:12px 8px;font-size:13px;cursor:pointer;color:#555;border-right:1px solid var(--linha)}
+  .passos-tab button:last-child{border-right:0}
+  .passos-tab button b{display:block;font-size:15px;color:var(--tinta)}
+  .passos-tab button.ativo{background:var(--preto);color:#ddd}
+  .passos-tab button.ativo b{color:var(--amarelo)}
+  .passo-conteudo{display:none}
+  .passo-conteudo.ativo{display:block}
+  .campo-guia{display:grid;grid-template-columns:200px 1fr;gap:14px;background:#fff;border:1px solid var(--linha);border-radius:10px;padding:14px 16px;margin-bottom:8px}
+  .campo-guia .nome{font-weight:700;font-size:14px}
+  .campo-guia .nome small{display:block;font-weight:500;color:var(--tinta-fraca);font-size:11.5px;margin-top:2px}
+  .campo-guia p{margin:0;font-size:13.5px;color:#333}
+  .campo-guia .preencha{margin-top:6px;font-size:13px;background:var(--ok-bg);color:#14532d;border-radius:6px;padding:6px 10px}
+  .campo-guia .atencao{margin-top:6px;font-size:13px;background:var(--erro-bg);color:#7a1d14;border-radius:6px;padding:6px 10px}
+  .campo-guia .local{margin-top:6px;font-size:13px;background:var(--amarelo-claro);color:#5a4200;border-radius:6px;padding:6px 10px;border:1px dashed #e0a800}
+  .perguntas-iss{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:10px;margin:6px 0 10px}
+  .perguntas-iss div{border:1px solid var(--linha);border-radius:10px;padding:12px 14px;background:#fff}
+  .perguntas-iss h5{margin:0 0 4px;font-size:13.5px}
+  .perguntas-iss .resp-padrao{font-weight:800;color:var(--ok);font-size:13px}
+  .perguntas-iss p{margin:4px 0 0;font-size:12.5px;color:var(--tinta-fraca)}
+  .decisao{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .decisao>div{border:1px solid var(--linha);border-radius:10px;padding:16px;background:#fff}
+  .decisao h4{margin:0 0 6px;font-size:15px}
+  .decisao p,.decisao li{font-size:13.5px;color:#333}
+  .decisao ul{padding-left:18px;margin:6px 0 0}
+  .erro-msg{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;background:#2a2a2a;color:#ffd7a8;border-radius:6px;padding:6px 10px;display:inline-block;margin-bottom:6px}
+  .turmas{display:flex;flex-direction:column;gap:8px}
+  .turma{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--linha);border-radius:10px;padding:12px 14px}
+  .turma .dt{background:var(--preto);color:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex:none;min-width:58px}
+  .turma .dt b{display:block;font-size:19px;color:var(--amarelo);line-height:1.1}
+  .turma .dt small{font-size:11px}
+  .turma div.txt{flex:1;font-size:13.5px}
+  .turma div.txt small{display:block;color:var(--tinta-fraca);font-size:12px}
+  .barra-funil{display:flex;flex-direction:column;gap:8px}
+  .barra-funil div{display:grid;grid-template-columns:210px 1fr 60px;gap:10px;align-items:center;font-size:13px}
+  .barra-funil span.trilho{height:14px;background:#efe9de;border-radius:999px;overflow:hidden}
+  .barra-funil span.trilho i{display:block;height:100%;background:var(--laranja-vivo);border-radius:999px}
+  .barra-funil b{text-align:right}
+  @media (max-width:700px){
+    .campo-guia{grid-template-columns:1fr;gap:4px}
+    .decisao{grid-template-columns:1fr}
+    .passos-tab button{font-size:11px;padding:10px 4px}
+    .passos-tab button b{font-size:13px}
+    .barra-funil div{grid-template-columns:1fr 50px}
+    .barra-funil span.trilho{grid-column:1/-1;grid-row:2}
+  }
+
+  /* ---------- vídeo do YouTube (carrega o player só ao clicar) ---------- */
+  .yt{position:relative;aspect-ratio:16/9;background:#000 center/cover no-repeat;border-radius:10px;overflow:hidden;cursor:pointer}
+  .yt::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 50%,rgba(0,0,0,.6))}
+  .yt .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:44px;border-radius:12px;
+            background:#e00;display:grid;place-items:center;color:#fff;font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .yt:hover .play{background:#f00}
+  .yt .ord{position:absolute;left:10px;top:10px;background:var(--amarelo);color:#111;font-size:11.5px;font-weight:800;border-radius:5px;padding:2px 8px}
+  .yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .video-card{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);overflow:hidden;box-shadow:var(--sombra)}
+  .video-card .yt{border-radius:0}
+  .video-card .info{padding:12px 14px}
+  .video-card h4{margin:0 0 6px;font-size:14px;line-height:1.35}
+  .video-card .meta{font-size:12px;color:var(--tinta-fraca);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .trilha-videos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:14px}
+  .video-lado{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:center}
+  @media (max-width:800px){ .video-lado{grid-template-columns:1fr} }
+
+  /* ---------- serviços online ---------- */
+  .atalhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px;margin-bottom:18px}
+  .atalho{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+          padding:14px 16px;box-shadow:var(--sombra);border-left:5px solid var(--laranja-vivo);transition:.12s}
+  .atalho:hover{border-color:var(--laranja);box-shadow:0 4px 14px rgba(232,111,0,.14)}
+  .atalho .ic{width:42px;height:42px;border-radius:10px;background:var(--amarelo-claro);color:var(--laranja);display:grid;place-items:center;flex:none;font-size:20px}
+  .atalho b{display:block;font-size:14.5px}
+  .atalho small{color:var(--tinta-fraca);font-size:12px}
+  .atalho .seta-ext{margin-left:auto;color:var(--tinta-fraca);font-size:15px}
+  .selo-cartao{display:inline-block;background:var(--ok);color:#fff;font-size:11px;font-weight:800;border-radius:5px;padding:1px 7px;margin-top:3px}
+  .servico-online{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:20px 22px;margin-bottom:14px;box-shadow:var(--sombra);
+                  display:grid;grid-template-columns:52px 1fr auto;gap:16px;align-items:start}
+  .servico-online .ic{width:52px;height:52px;border-radius:12px;background:var(--amarelo-claro);color:var(--laranja);display:grid;place-items:center;font-size:24px}
+  .servico-online h3{margin:0 0 4px;font-size:17px}
+  .servico-online p{margin:0 0 8px;font-size:13.5px;color:#3b3b3b}
+  .servico-online ul{margin:0;padding-left:18px;font-size:13px;color:var(--tinta-fraca)}
+  .aviso{border-radius:8px;padding:10px 12px;font-size:13px;margin-top:10px;display:flex;gap:8px;align-items:flex-start}
+  .aviso.mudanca{background:var(--espera-bg);color:#6b3f00;border:1px solid #f3d38a}
+  .aviso.boa{background:var(--ok-bg);color:#14532d;border:1px solid #bfe3c7}
+  .externo{font-size:11.5px;color:var(--tinta-fraca);margin-top:6px;text-align:right}
+  .qual-emissor{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px}
+  .qual-emissor>div{background:#fff;border:1px solid var(--linha);border-radius:10px;padding:14px 16px}
+  .qual-emissor h4{margin:0 0 4px;font-size:14.5px}
+  .qual-emissor p{margin:0;font-size:13px;color:#3b3b3b}
+  .qual-emissor .onde{display:inline-block;margin-top:8px;font-weight:700;font-size:12.5px}
+  @media (max-width:700px){ .servico-online{grid-template-columns:1fr} .servico-online .ic{display:none} }
+
+  /* ---------- Conexão Empresarial ---------- */
+  .evento-topo{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center;background:#fff;border:1px solid var(--linha);
+               border-radius:var(--raio);padding:18px;margin-bottom:16px;box-shadow:var(--sombra)}
+  .evento-topo img{width:100%;border-radius:10px;display:block}
+  .evento-topo>div{min-width:0}
+  .evento-topo .tag{white-space:normal}
+  .evento-topo h1{margin:0 0 6px;font-size:24px;line-height:1.2}
+  .evento-topo p{margin:0 0 10px;color:var(--tinta-fraca);font-size:14px}
+  .numeros{display:flex;gap:10px;flex-wrap:wrap}
+  .numeros div{background:var(--creme);border:1px solid #f3d38a;border-radius:10px;padding:8px 14px;font-size:12.5px;color:var(--tinta-fraca)}
+  .numeros b{display:block;font-size:22px;color:var(--laranja);letter-spacing:-.5px}
+  .tema{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);margin-bottom:12px;box-shadow:var(--sombra);overflow:hidden}
+  .tema>summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;gap:12px;align-items:center}
+  .tema>summary::-webkit-details-marker{display:none}
+  .tema>summary h3{margin:0;font-size:16px;flex:1}
+  .tema>summary .qtd{background:var(--amarelo);color:#111;font-weight:800;font-size:12px;border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .tema>summary::after{content:"▾";color:var(--tinta-fraca);font-size:14px}
+  .tema[open]>summary::after{content:"▴"}
+  .tema .corpo-tema{padding:0 18px 18px}
+  .citacoes{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .citacao{background:var(--fundo);border-left:3px solid var(--laranja-vivo);border-radius:0 8px 8px 0;padding:8px 12px;font-size:13px;color:#333}
+  .citacao small{display:block;color:var(--tinta-fraca);font-size:11.5px;margin-top:2px}
+  .resposta-tema{font-size:14px;color:#2a2f36;line-height:1.6}
+  .resposta-tema p{margin:0 0 10px}
+  .resposta-tema ul,.resposta-tema ol{margin:0 0 10px;padding-left:20px}
+  .resposta-tema li{margin-bottom:4px}
+  .resp-rotulo{font-size:11.5px;font-weight:800;color:var(--ok);text-transform:uppercase;letter-spacing:.5px;margin:4px 0 6px}
+  .links-tema{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  @media (max-width:700px){ .evento-topo{grid-template-columns:1fr} .evento-topo img{max-width:220px} }
+
+  /* ---------- guia ilustrado NFS-e ---------- */
+  .downloads{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:12px;margin-bottom:14px}
+  .download{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:14px 16px;box-shadow:var(--sombra)}
+  .download:hover{border-color:var(--laranja-vivo)}
+  .download .pdf{background:#c62828;color:#fff;font-weight:800;font-size:12px;border-radius:6px;padding:10px 8px;flex:none}
+  .download b{display:block;font-size:14px}
+  .download small{color:var(--tinta-fraca);font-size:12px}
+  .download .baixar{margin-left:auto;font-weight:700;color:var(--laranja);font-size:13px;white-space:nowrap}
+  .sumario{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:8px;margin-bottom:16px}
+  .sum-item{background:var(--preto);color:#ddd;border-radius:10px;padding:10px 12px;font-size:13px;cursor:pointer}
+  .sum-item b{color:var(--amarelo);font-size:18px;margin-right:6px}
+  .sum-item small{display:block;color:#999;font-size:11.5px;margin-top:2px}
+  .sum-item:hover{background:#333}
+  .lista-passos{display:flex;flex-direction:column;gap:14px}
+  .passo-img{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:center;border-bottom:1px dashed var(--linha);padding-bottom:14px}
+  .passo-img:last-child{border-bottom:0;padding-bottom:0}
+  .passo-img figure{margin:0;border:1px solid var(--linha);border-radius:8px;overflow:hidden;background:#f7f7f7;cursor:zoom-in}
+  .passo-img img{display:block;width:100%;height:auto}
+  .passo-img .num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--amarelo);color:#111;font-weight:800;font-size:13px;margin-bottom:6px}
+  .passo-img h4{margin:0 0 6px;font-size:15.5px}
+  .passo-img p{margin:0;font-size:14px;color:#333;line-height:1.55}
+  .passo-img .dica{margin-top:8px;background:var(--amarelo-claro);border-radius:6px;padding:7px 10px;font-size:13px;color:#5a4200}
+  .grade-celular{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(200px,100%),1fr));gap:14px}
+  .grade-celular .passo-img{grid-template-columns:1fr;border:1px solid var(--linha);border-radius:10px;padding:12px;align-items:start}
+  .grade-celular .passo-img:last-child{padding-bottom:12px}
+  .grade-celular figure{max-width:180px;margin:0 auto}
+  .zoom{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;z-index:100;align-items:center;justify-content:center;flex-direction:column;padding:20px;cursor:zoom-out}
+  .zoom.aberto{display:flex}
+  .zoom img{max-width:100%;max-height:85vh;border-radius:6px;background:#fff}
+  .zoom p{color:#eee;font-size:14px;margin:10px 0 0;text-align:center}
+  .zoom .fechar{position:absolute;top:14px;right:18px;color:#fff;font-size:14px;font-weight:700}
+  @media (max-width:800px){ .passo-img{grid-template-columns:1fr} }
+
+  /* ---------- atendimento ---------- */
+  .atendimento{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px;margin-bottom:18px}
+  .at-item{display:flex;gap:12px;background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:14px 16px;box-shadow:var(--sombra)}
+  .at-item .ic{font-size:22px;flex:none}
+  .at-item>div{min-width:0}
+  .at-item b{display:block;font-size:14.5px}
+  .at-item small{display:block;color:var(--tinta-fraca);font-size:12px;margin-bottom:4px}
+  .at-item p{margin:0 0 4px;font-size:13px;color:#333;overflow-wrap:anywhere}
+  .at-item a{color:var(--laranja);font-weight:700;font-size:13px}
+  .rodape-site .colunas{display:grid;grid-template-columns:auto 1fr 1fr;gap:28px;padding:22px 26px;align-items:start}
+  .rodape-site h5{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:#9a4a00}
+  .rodape-site .colunas p{margin:0 0 4px;font-size:13px;color:var(--tinta-fraca);line-height:1.55}
+  .rodape-site .colunas a{color:var(--laranja);font-weight:600}
+  @media (max-width:800px){ .rodape-site .colunas{grid-template-columns:1fr} }
+
+  /* ---------- painel interno ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  .kpi{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:14px 16px;border-left:4px solid var(--laranja-vivo)}
+  .kpi span{font-size:12.5px;color:var(--tinta-fraca)}
+  .kpi b{display:block;font-size:26px;letter-spacing:-.5px}
+  .painel{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);
+          padding:18px 20px;margin-bottom:16px;box-shadow:var(--sombra)}
+  .painel h3{margin:0 0 12px;font-size:15.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  table.lista{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.lista th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--tinta-fraca);
+     font-weight:600;padding:8px 10px;border-bottom:1px solid var(--linha)}
+  table.lista td{padding:10px;border-bottom:1px solid var(--linha);vertical-align:top}
+  table.lista tr.sel td{background:#fff4e0}
+  table.lista.clicavel tbody tr{cursor:pointer}
+  table.lista.clicavel tbody tr:hover td{background:#fffaf0}
+  .pergunta-orig{background:var(--fundo);border:1px solid var(--linha);border-radius:8px;padding:12px 14px;font-size:14px;margin-bottom:12px}
+  .pergunta-orig .quem{font-size:12px;color:var(--tinta-fraca);margin-bottom:6px}
+  .acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+  .modulos{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .modulo{background:#fff;border:1px solid var(--linha);border-radius:var(--raio);padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+  .modulo .cab{display:flex;align-items:center;gap:10px}
+  .modulo h4{margin:0;font-size:15px;flex:1}
+  .modulo p{margin:0;font-size:12.5px;color:var(--tinta-fraca)}
+  .modulo .pub{font-size:11.5px;color:var(--tinta-fraca)}
+  .chave{width:38px;height:22px;border-radius:999px;background:#d4d0c8;position:relative;flex:none;cursor:pointer;border:0}
+  .chave::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+  .chave.on{background:var(--ok)}
+  .chave.on::after{left:19px}
+  .linha-conf{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--linha);font-size:13.5px}
+  .linha-conf:last-child{border-bottom:0}
+  .linha-conf span{flex:1}
+  .linha-conf small{display:block;color:var(--tinta-fraca);font-size:12px}
+
+  .pergunta-aberta{background:var(--amarelo-claro);border:1px dashed #e0a800;border-radius:var(--raio);padding:12px 16px;font-size:13px;color:#5a4200;margin-top:18px}
+  .pergunta-aberta b{color:#7a4a00}
+
+  /* ---------- rodapé ---------- */
+  .rodape-site{background:#fff;border-top:1px solid var(--linha)}
+  .rodape-site .info{display:flex;align-items:center;gap:28px;padding:20px 26px;flex-wrap:wrap}
+  .rodape-site img{height:62px}
+  .rodape-site .contato{font-size:13px;color:var(--tinta-fraca);line-height:1.6}
+  .rodape-site .contato b{color:var(--tinta)}
+
+  @media (max-width:1150px){ .duas,.duas.larga,.duas.meio{grid-template-columns:1fr} }
+  .painel{overflow-x:auto}
+  .duas>*{min-width:0}
+  @media (max-width:900px){
+    .lateral{display:none}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .conteudo{padding:16px}
+    .artigo{padding:20px}
+    .comparativo{grid-template-columns:1fr}
+    .topo img{height:38px}
+    .topo-acoes .link{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- Barra só do protótipo: troca de telas -->
+<div class="proto">
+  <b>PROTÓTIPO</b>
+  <span>Cidadão:</span>
+  <button data-ir="inicio" class="ativo">Início</button>
+  <button data-ir="entenda">Entenda a reforma</button>
+  <button data-ir="noticias">Notícias oficiais</button>
+  <button data-ir="artigo">Guia: Simples 2027</button>
+  <button data-ir="cronograma">Cronograma</button>
+  <button data-ir="faq">Perguntas + dúvida</button>
+  <button data-ir="videos">Vídeos e materiais</button>
+  <button data-ir="servicos">Serviços online</button>
+  <button data-ir="evento">Conexão Empresarial</button>
+  <span class="sep"></span>
+  <span>NFS-e Nacional:</span>
+  <button data-ir="nfse-inicio">Início NFS-e</button>
+  <button data-ir="nfse-acesso">Primeiro acesso</button>
+  <button data-ir="nfse-emitir">Emitir</button>
+  <button data-ir="nfse-guia">Guia ilustrado</button>
+  <button data-ir="nfse-depois">Depois de emitir</button>
+  <button data-ir="nfse-problemas">Problemas</button>
+  <button data-ir="nfse-materiais">Materiais</button>
+  <span class="sep"></span>
+  <span>Secretaria:</span>
+  <button data-ir="adm-monitor">Monitor CGIBS</button>
+  <button data-ir="adm-nfse">Migração NFS-e</button>
+  <button data-ir="adm-evento">Dúvidas do evento</button>
+  <button data-ir="adm-duvidas">Caixa de dúvidas</button>
+  <button data-ir="adm-publicar">Publicar</button>
+  <button data-ir="adm-modulos">Módulos</button>
+</div>
+
+<div class="faixa-topo" aria-hidden="true"></div>
+
+<!-- ================= TOPO ================= -->
+<header class="topo">
+  <img src="img/logo-secretaria.webp" alt="Prefeitura Municipal de Canindé — Secretaria de Finanças">
+  <div class="topo-acoes" id="topo-acoes"></div>
+</header>
+
+<div class="estrutura">
+
+  <!-- ================= MENU LATERAL ================= -->
+  <nav class="lateral">
+    <div class="busca">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input placeholder="Buscar no portal">
+    </div>
+
+    <div class="menu" id="menu-cidadao">
+      <a data-ir="inicio" class="ativo">Início</a>
+      <div class="rotulo">Reforma Tributária</div>
+      <a data-ir="noticias">Notícias oficiais <span class="novo">3</span></a>
+      <a data-ir="entenda">Entenda a reforma</a>
+      <a data-ir="artigo">Guias e dicas</a>
+      <a data-ir="cronograma">Cronograma e prazos</a>
+      <a data-ir="faq">Perguntas frequentes</a>
+      <a data-ir="videos">Vídeos e materiais</a>
+      <a data-ir="noticias">Legislação</a>
+      <div class="rotulo">Nota fiscal de serviço</div>
+      <a data-ir="nfse-inicio">NFS-e Nacional <span class="novo">novo</span></a>
+      <div class="rotulo">Fale com a Secretaria</div>
+      <a data-ir="faq">Enviar uma dúvida</a>
+      <a data-ir="faq">Acompanhar minha dúvida</a>
+      <a data-ir="evento">Conexão Empresarial: respostas</a>
+      <div class="rotulo">Serviços online</div>
+      <a href="https://iss.speedgov.com.br/caninde/login" target="_blank" rel="noopener">Emitir nota fiscal (ISS) ↗</a>
+      <a href="https://servicos2.speedgov.com.br/caninde/segunda_via/iptu" target="_blank" rel="noopener">2ª via do IPTU ↗</a>
+      <a href="https://servicos2.speedgov.com.br/caninde/pages/certidao_economico" target="_blank" rel="noopener">Certidão da empresa ↗</a>
+      <a href="https://servicos2.speedgov.com.br/caninde" target="_blank" rel="noopener">Débitos e guias (DAM) ↗</a>
+      <a data-ir="servicos">Todos os serviços e contatos</a>
+    </div>
+
+    <div class="menu" id="menu-nfse" style="display:none">
+      <div class="menu-nfse-cab"><small>AMBIENTE</small><b>NFS-e Nacional</b><a data-ir="inicio">← voltar ao portal</a></div>
+      <a data-ir="nfse-inicio">Comece aqui</a>
+      <a href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener" style="font-weight:700">Acessar o Emissor Nacional ↗</a>
+      <div class="rotulo">Passo a passo</div>
+      <a data-ir="nfse-acesso">1. Primeiro acesso</a>
+      <a data-ir="nfse-emitir">2. Emitir a nota</a>
+      <a data-ir="nfse-guia">📷 Guia ilustrado (tela por tela)</a>
+      <a data-ir="nfse-depois">3. Depois de emitir</a>
+      <div class="rotulo">Ajuda</div>
+      <a data-ir="nfse-problemas">Problemas comuns</a>
+      <a data-ir="nfse-materiais">Vídeos, guias e oficinas</a>
+    </div>
+
+    <div class="menu" id="menu-equipe" style="display:none">
+      <div class="rotulo">Fontes oficiais</div>
+      <a data-ir="adm-monitor">Monitor CGIBS <span class="novo">3</span></a>
+      <div class="rotulo">NFS-e Nacional</div>
+      <a data-ir="adm-nfse">Migração dos prestadores</a>
+      <div class="rotulo">Atendimento</div>
+      <a data-ir="adm-duvidas">Caixa de dúvidas</a>
+      <a data-ir="adm-evento">Dúvidas do Conexão Empresarial <span class="novo">23</span></a>
+      <div class="rotulo">Conteúdo</div>
+      <a data-ir="adm-publicar">Publicar conteúdo</a>
+      <div class="rotulo">Administração</div>
+      <a data-ir="adm-modulos">Módulos do portal</a>
+      <a>Usuários e perfis</a>
+    </div>
+  </nav>
+
+  <main class="conteudo">
+
+    <!-- ================= INÍCIO ================= -->
+    <section class="tela ativa" id="inicio">
+      <div class="banner">
+        <div style="position:relative;z-index:1">
+          <div class="faixa-slogan"><span>O TRABALHO</span><span class="am">que</span><span>TRANSFORMA!</span></div>
+          <h1>Reforma Tributária: tudo o que muda,<br>explicado para Canindé</h1>
+          <p>Notícias e orientações sempre com base nas publicações oficiais do Comitê Gestor do IBS (CGIBS) e da Receita Federal, traduzidas pela Secretaria de Finanças para a realidade do município.</p>
+        </div>
+      </div>
+
+      <div class="atalhos">
+        <a class="atalho" href="https://servicos2.speedgov.com.br/caninde/segunda_via/iptu" target="_blank" rel="noopener"><span class="ic">🏠</span><span><b>2ª via do IPTU</b><span class="selo-cartao">pague no cartão de crédito</span></span><span class="seta-ext">↗</span></a>
+        <a class="atalho" href="https://iss.speedgov.com.br/caninde/login" target="_blank" rel="noopener"><span class="ic">🧾</span><span><b>Emitir nota fiscal de serviço</b><small>ISS Eletrônico de Canindé</small></span><span class="seta-ext">↗</span></a>
+        <a class="atalho" href="https://servicos2.speedgov.com.br/caninde/pages/certidao_economico" target="_blank" rel="noopener"><span class="ic">📄</span><span><b>Certidão da empresa</b><small>pela inscrição econômica</small></span><span class="seta-ext">↗</span></a>
+        <a class="atalho" data-ir="servicos" style="cursor:pointer"><span class="ic">☎️</span><span><b>Fale com a Arrecadação</b><small>(85) 9 8193-4279 · e-mail · presencial</small></span><span class="seta-ext">➜</span></a>
+      </div>
+
+      <!-- Prazos: preenchido pelo script a partir da lista de prazos -->
+      <div class="prazos">
+        <div class="prazos-cab">
+          <h3>⏰ Prazos que estão correndo</h3>
+          <span class="tag erro">Prorrogado — Resolução CGSN 194</span>
+          <a class="tag oficial" data-ir="noticias" style="cursor:pointer">Fonte: CGIBS / Receita Federal, 30/09/2026</a>
+        </div>
+        <div class="prazos-grade" id="prazos-home"></div>
+      </div>
+
+      <div class="banner nfse" data-ir="nfse-inicio" style="cursor:pointer;padding:20px 26px;flex-wrap:wrap">
+        <div style="position:relative;z-index:1;flex:1;min-width:220px">
+          <span class="selo-nfse">NOVO · NFS-e NACIONAL</span>
+          <h1 style="font-size:22px">Prestador de serviço: prepare-se para emitir pelo Emissor Nacional</h1>
+          <p>Primeiro acesso, passo a passo da nota, vídeos e atendimento presencial da Secretaria.</p>
+        </div>
+        <span class="botao" style="position:relative;z-index:1;background:var(--amarelo);color:#111;flex:none">Entrar no ambiente ➜</span>
+      </div>
+
+      <h2 class="secao">Últimas do Comitê Gestor do IBS</h2>
+      <p class="sub">Capturadas automaticamente do site oficial <b>cgibs.gov.br</b>. Quando a notícia afeta Canindé, a Secretaria acrescenta uma explicação.</p>
+      <div class="duas">
+        <div class="noticias" id="noticias-home"></div>
+        <div>
+          <div class="caixa-lateral">
+            <span class="sinc">Sincronizado com cgibs.gov.br hoje às 06:00</span>
+            <p style="margin:8px 0 0">O portal confere o site do Comitê Gestor várias vezes ao dia. Nenhuma notícia oficial fica de fora.</p>
+            <button class="botao peq preto" data-ir="noticias" style="margin-top:10px">Ver todas as notícias</button>
+          </div>
+          <div class="caixa-lateral">
+            <h4>Para quem é este portal</h4>
+            <ul>
+              <li><b>MEI e Simples Nacional</b>: a decisão de 2027</li>
+              <li><b>Prestadores de serviço</b>: ISS e NFS-e nacional</li>
+              <li><b>Contadores</b>: legislação e comunicados</li>
+              <li><b>Cidadão</b>: o que muda no dia a dia</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="evento-topo" data-ir="evento" style="cursor:pointer;grid-template-columns:110px 1fr">
+        <img src="img/conexao-empresarial.webp" alt="Conexão Empresarial Canindé">
+        <div><span class="tag lar">Conexão Empresarial Canindé · 19/09/2026</span>
+          <h3 style="margin:6px 0 4px;font-size:17px">Respondemos as perguntas dos participantes</h3>
+          <p style="margin:0;font-size:13.5px">24 perguntas sobre Simples Nacional, MEI, preços, serviços e nota fiscal, agrupadas por tema.</p></div>
+      </div>
+
+      <h2 class="secao">Comece por aqui</h2>
+      <p class="sub">Conteúdo produzido pela Secretaria de Finanças.</p>
+      <div class="grade">
+        <div class="servico">
+          <div class="quadro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg></div>
+          <h3>Entenda a reforma</h3>
+          <p>IBS, CBS, cobrança no destino, nanoempreendedor e cashback, com a base legal de cada ponto.</p>
+          <button class="botao peq" data-ir="entenda">Entender</button>
+        </div>
+        <div class="servico">
+          <div class="quadro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></div>
+          <h3>Simples “puro” ou “híbrido”?</h3>
+          <p>O guia da decisão de 2027 para micro e pequenas empresas, com os prazos novos.</p>
+          <button class="botao peq" data-ir="artigo">Ler o guia</button>
+        </div>
+        <div class="servico">
+          <div class="quadro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+          <h3>Cronograma 2026–2033</h3>
+          <p>Ano a ano, o que entra em vigor e o que acontece com o ISS de Canindé.</p>
+          <button class="botao peq" data-ir="cronograma">Ver cronograma</button>
+        </div>
+        <div class="servico">
+          <div class="quadro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></div>
+          <h3>Vídeos e palestras</h3>
+          <p>Gravações da Secretaria, vídeos oficiais do CGIBS e materiais das palestras em Canindé.</p>
+          <button class="botao peq" data-ir="videos">Assistir</button>
+        </div>
+        <div class="servico">
+          <div class="quadro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3>Pergunte à Secretaria</h3>
+          <p>Não achou a resposta? Envie sua dúvida e receba um protocolo. A resposta chega por e-mail.</p>
+          <button class="botao peq preto" data-ir="faq">Perguntar</button>
+        </div>
+      </div>
+
+      <h2 class="secao">Como garantimos que a informação é oficial</h2>
+      <p class="sub">&nbsp;</p>
+      <div class="passos">
+        <div class="passo"><div class="n">1</div><h4>Captura automática</h4><p>O portal lê as notícias, comunicados, legislação e vídeos publicados no site do CGIBS.</p></div>
+        <div class="passo"><div class="n">2</div><h4>Leitura da equipe</h4><p>A Secretaria classifica por público e marca o que tem prazo.</p></div>
+        <div class="passo"><div class="n">3</div><h4>Explicação local</h4><p>Quando afeta Canindé, acrescentamos “o que isso significa para você”.</p></div>
+        <div class="passo"><div class="n">4</div><h4>Sempre com a fonte</h4><p>Todo conteúdo mostra a base oficial e o link para o original.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= ENTENDA A REFORMA ================= -->
+    <section class="tela" id="entenda">
+      <div class="banner">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M8 7h8M8 11h6"/></svg>
+        <div style="position:relative;z-index:1"><h1>Entenda a Reforma Tributária do consumo</h1><p>Guia explicativo para cidadãos e empresas. Cada bloco traz o artigo da lei em que se baseia.</p></div>
+      </div>
+      <div class="trilha">Início › Reforma Tributária › <b>Entenda a reforma</b></div>
+
+      <!-- 1. IVA dual -->
+      <div class="bloco">
+        <h3>1. Cinco tributos viram dois (IVA dual)</h3>
+        <p class="sub">Os tributos sobre o consumo são substituídos por uma única regra, igual em todo o país.</p>
+        <div class="iva">
+          <div class="antigos">
+            <span>ISS <small>· municipal</small></span>
+            <span>ICMS <small>· estadual</small></span>
+            <span>PIS <small>· federal</small></span>
+            <span>Cofins <small>· federal</small></span>
+            <span>IPI <small>· federal</small></span>
+          </div>
+          <div class="seta">➜</div>
+          <div class="novos">
+            <div class="cbs"><b>CBS</b><small>Contribuição sobre Bens e Serviços · <b style="display:inline;font-size:inherit">União</b><br>substitui PIS e Cofins</small></div>
+            <div class="ibs"><b>IBS</b><small>Imposto sobre Bens e Serviços · <b style="display:inline;font-size:inherit">Estados e Municípios</b><br>substitui ICMS e ISS</small></div>
+            <div class="is"><b style="display:inline;font-size:inherit">Imposto Seletivo</b> · cobrado sobre produtos prejudiciais à saúde ou ao meio ambiente. O IPI é zerado, exceto para produtos que também são fabricados na Zona Franca de Manaus.</div>
+          </div>
+        </div>
+        <div class="base">Base oficial: EC 132/2023 · LC 214/2025</div>
+      </div>
+
+      <!-- 2. Pilares -->
+      <div class="bloco">
+        <h3>2. Os pilares da nova tributação</h3>
+        <p class="sub">&nbsp;</p>
+        <div class="pilares">
+          <div class="pilar"><h4>Cobrança no destino</h4>
+            <p>O IBS passa a pertencer ao município onde o bem ou serviço é consumido, e não mais onde fica a sede da empresa. Isso enfraquece a guerra fiscal entre municípios.</p>
+            <p style="margin-top:8px;font-size:12.5px;color:var(--tinta-fraca)">A mudança na divisão da arrecadação entre municípios é gradual, de 2029 a 2077.</p></div>
+          <div class="pilar"><h4>Imposto “por fora” e visível na nota</h4>
+            <p>O tributo deixa de vir embutido no preço. A nota mostra quanto foi pago de IBS e de CBS.</p>
+            <div class="nota-fiscal">Produto ........ R$ 100,00<br><b>CBS</b> ............ R$ X,XX (Y%)<br><b>IBS</b> ............ R$ X,XX (Y%)</div></div>
+          <div class="pilar"><h4>Cadastro único: CPF, CNPJ e CIB</h4>
+            <p>Pessoas físicas são identificadas pelo CPF, empresas pelo CNPJ e imóveis urbanos e rurais pelo <b>CIB</b> (Cadastro Imobiliário Brasileiro). Os dados são compartilhados entre União, estados e municípios.</p>
+            <div class="base" style="margin-top:8px">LC 214/2025, art. 59</div></div>
+        </div>
+      </div>
+
+      <!-- 3. Pequenos negócios -->
+      <div class="bloco">
+        <h3>3. Simples Nacional, MEI e nanoempreendedor</h3>
+        <p class="sub">&nbsp;</p>
+        <div class="pilares">
+          <div class="pilar"><h4>Simples e MEI continuam</h4>
+            <p>Os pequenos negócios mantêm o recolhimento unificado no DAS, com simplicidade e carga favorecida.</p></div>
+          <div class="pilar"><h4>Opção “híbrida”</h4>
+            <p>Empresa do Simples pode recolher IBS e CBS por fora do DAS, no regime regular, para gerar crédito integral para os clientes que são empresas.</p>
+            <button class="botao peq vazio" data-ir="artigo" style="margin-top:10px">Ver o guia e os prazos</button></div>
+          <div class="pilar"><h4>Nanoempreendedor</h4>
+            <p>Pessoa física com receita bruta abaixo de 50% do limite do MEI, e que não aderiu ao MEI, não é contribuinte de IBS e CBS.</p>
+            <div class="base" style="margin-top:8px">LC 214/2025, art. 26</div></div>
+        </div>
+      </div>
+
+      <!-- 4. Cashback -->
+      <div class="bloco">
+        <h3>4. Cashback: devolução para famílias de baixa renda</h3>
+        <p class="sub">Para famílias inscritas no CadÚnico com renda de até meio salário mínimo por pessoa, CPF regular e residência no Brasil.</p>
+        <div class="cashback">
+          <div class="cb"><div class="pct"><div><b>100%</b><small>da CBS</small></div><div><b>20%</b><small>do IBS</small></div></div>
+            <h4>Serviços essenciais</h4><p>Botijão de gás de até 13 kg, energia elétrica, água, esgoto, gás canalizado e telecomunicações.</p></div>
+          <div class="cb"><div class="pct"><div><b>20%</b><small>da CBS</small></div><div><b>20%</b><small>do IBS</small></div></div>
+            <h4>Demais compras</h4><p>Percentual mínimo de devolução nas outras compras de bens e serviços.</p></div>
+        </div>
+        <div class="base">Base oficial: LC 214/2025, arts. 112 a 118 (percentuais no art. 118)</div>
+      </div>
+
+      <!-- 5. Transição -->
+      <div class="bloco">
+        <h3>5. Transição gradual: 2026 a 2033</h3>
+        <p class="sub">Peso do ISS e do ICMS (cinza) frente ao IBS (laranja) em cada ano. A CBS vale integralmente desde 2027.</p>
+        <div class="grafico">
+          <div class="ano"><div class="barra"><i class="antigo" style="height:100%"></i></div><b>2026</b><small>teste: CBS 0,9% · IBS 0,1%</small></div>
+          <div class="ano"><div class="barra"><i class="antigo" style="height:100%"></i></div><b>2027</b><small>CBS integral · fim de PIS/Cofins</small></div>
+          <div class="ano"><div class="barra"><i class="antigo" style="height:100%"></i></div><b>2028</b><small>ISS integral</small></div>
+          <div class="ano"><div class="barra"><i class="novo" style="height:10%"></i><i class="antigo" style="height:90%"></i></div><b>2029</b><small>ISS e ICMS a 90%</small></div>
+          <div class="ano"><div class="barra"><i class="novo" style="height:20%"></i><i class="antigo" style="height:80%"></i></div><b>2030</b><small>a 80%</small></div>
+          <div class="ano"><div class="barra"><i class="novo" style="height:30%"></i><i class="antigo" style="height:70%"></i></div><b>2031</b><small>a 70%</small></div>
+          <div class="ano"><div class="barra"><i class="novo" style="height:40%"></i><i class="antigo" style="height:60%"></i></div><b>2032</b><small>a 60%</small></div>
+          <div class="ano"><div class="barra"><i class="novo" style="height:100%"></i></div><b>2033</b><small>ISS e ICMS extintos</small></div>
+        </div>
+        <div class="legenda"><span><i style="background:#8a8378"></i>ISS / ICMS</span><span><i style="background:var(--laranja-vivo)"></i>IBS</span></div>
+        <div class="base">Base oficial: EC 132/2023 · LC 214/2025 · <a data-ir="cronograma">ver o cronograma detalhado</a></div>
+      </div>
+    </section>
+
+    <!-- ================= NOTÍCIAS OFICIAIS ================= -->
+    <section class="tela" id="noticias">
+      <div class="banner">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg>
+        <div style="position:relative;z-index:1"><h1>Notícias oficiais da Reforma</h1><p>Tudo o que o Comitê Gestor do IBS publica, no mesmo dia. Com a explicação da Secretaria quando o assunto afeta Canindé.</p></div>
+      </div>
+      <div class="trilha">Início › Reforma Tributária › <b>Notícias oficiais</b></div>
+      <div class="filtros" id="filtro-noticias">
+        <button class="chip ativo" data-f="todos">Tudo</button>
+        <button class="chip" data-f="noticia">Notícias</button>
+        <button class="chip" data-f="comunicado">Comunicados oficiais</button>
+        <button class="chip" data-f="legislacao">Legislação</button>
+        <button class="chip" data-f="prazo">Só o que tem prazo</button>
+        <button class="chip" data-f="local">Com explicação para Canindé</button>
+      </div>
+      <div class="duas">
+        <div class="noticias" id="noticias-lista"></div>
+        <div>
+          <div class="caixa-lateral">
+            <span class="sinc">Última verificação: hoje às 06:00</span>
+            <p style="margin:8px 0 0">Fontes acompanhadas:</p>
+            <ul>
+              <li>cgibs.gov.br — Notícias</li>
+              <li>cgibs.gov.br — Comunicados oficiais</li>
+              <li>cgibs.gov.br — Legislações e resoluções</li>
+              <li>cgibs.gov.br — Vídeos, guias e cartilhas</li>
+            </ul>
+          </div>
+          <div class="caixa-lateral">
+            <h4>Receba por e-mail ou WhatsApp</h4>
+            <p>Cadastre-se para receber um aviso quando sair prazo novo ou prorrogação.</p>
+            <div class="campo" style="margin-top:8px"><input placeholder="seu e-mail ou celular"></div>
+            <button class="botao peq">Quero receber</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GUIA SIMPLES 2027 ================= -->
+    <section class="tela" id="artigo">
+      <div class="trilha">Início › Reforma Tributária › Guias › <b>Simples Nacional em 2027</b></div>
+      <div class="duas">
+        <article class="artigo">
+          <span class="tag lar">Guia</span> <span class="tag parado">MEI e Simples Nacional</span> <span class="tag erro">Prazo até 30/10</span>
+          <h1>Simples “puro” ou “híbrido”: a decisão de 2027 para micro e pequenas empresas</h1>
+          <div class="por">Secretaria Municipal de Finanças · atualizado em 02/10/2026 após a prorrogação de prazos · leitura de 5 min</div>
+
+          <p>O Simples Nacional continua existindo, o MEI mantém o tratamento simplificado e o limite geral continua em R$ 4,8 milhões. O que muda é que, a partir de 2027, o IBS e a CBS entram no Simples, e a empresa precisa escolher <b>como</b> vai recolher esses dois tributos.</p>
+
+          <h3>As duas trilhas</h3>
+          <div class="comparativo">
+            <div><h4>Simples “puro”</h4><p style="font-size:13px;margin:0 0 6px;color:var(--tinta-fraca)">IBS e CBS dentro do DAS</p>
+              <ul><li>Operação mais simples</li><li>Não aproveita créditos nas compras</li><li>Gera crédito menor para o cliente</li></ul></div>
+            <div><h4>Simples “híbrido”</h4><p style="font-size:13px;margin:0 0 6px;color:var(--tinta-fraca)">IBS e CBS fora do DAS, no regime regular</p>
+              <ul><li>Aproveita créditos nas compras</li><li>Gera crédito integral para o cliente</li><li>Exige mais controle e sistema preparado</li></ul></div>
+          </div>
+
+          <div class="caixa-dica"><b>A pergunta certa não é “qual imposto é menor?”.</b> É: meu cliente compra preço ou compra crédito? Quem vende para outras empresas (B2B) pode perder competitividade se não gerar crédito. Quem vende para o consumidor final (B2C) precisa olhar a margem e o preço.</div>
+
+          <h3>Os prazos (atualizados)</h3>
+          <table class="tabela-prazos">
+            <thead><tr><th>O que</th><th>Prazo</th></tr></thead>
+            <tbody>
+              <tr><td>Pedir para entrar ou voltar ao Simples Nacional em 2027</td><td><b>até 15/10/2026</b></td></tr>
+              <tr><td>Regularizar pendências se o pedido for indeferido</td><td><b>até 30/10/2026</b></td></tr>
+              <tr><td>Optante do Simples escolher IBS/CBS pelo regime regular (“híbrido”) para jan–jun/2027</td><td><b>até 30/10/2026</b></td></tr>
+              <tr><td>Desistir de qualquer das duas opções</td><td>03/11 a 20/12/2026</td></tr>
+            </tbody>
+          </table>
+          <div class="base">Base oficial: Resolução CGSN nº 194 · notícia “Opção do contribuinte por Simples Nacional ou pelo regime regular de CBS e IBS para 2027 tem novos prazos”, CGIBS/Receita Federal, 30/09/2026 · <a data-ir="noticias">ver no portal</a></div>
+
+          <h3>Antes de decidir, separe estes dados</h3>
+          <ul>
+            <li>Faturamento dos últimos 12 meses e anexo do Simples</li>
+            <li>Quanto você vende para empresas e quanto para consumidor final</li>
+            <li>De quem você compra e se esses fornecedores geram crédito</li>
+            <li>Folha, margem, investimentos previstos e contratos</li>
+          </ul>
+          <p>Com esses dados, peça ao seu contador para simular pelo menos três cenários: Simples puro, híbrido e preço ajustado.</p>
+
+          <div class="acoes" style="margin-top:18px">
+            <button class="botao peq vazio" data-ir="videos">▶ Palestra completa</button>
+            <button class="botao peq vazio" data-ir="faq">Perguntas sobre o tema</button>
+          </div>
+        </article>
+        <div>
+          <div class="caixa-lateral">
+            <h4>Quatro sinais de alerta para o MEI</h4>
+            <ul><li>Faturamento perto do limite</li><li>Movimentação na conta sem nota fiscal</li><li>Cliente empresa pedindo crédito</li><li>A operação ficou mais complexa</li></ul>
+          </div>
+          <div class="caixa-lateral">
+            <h4>Fim do regime de caixa no Simples</h4>
+            <p>A partir de 2027 o faturamento passa a ser reconhecido pelo documento fiscal, e não mais pelo recebimento. Isso afeta capital de giro e cobrança.</p>
+          </div>
+          <div class="caixa-lateral">
+            <h4>Conteúdo baseado em</h4>
+            <p>Palestra “Reforma Tributária para empresários — MEI e Simples Nacional”, Prof. Tiago Emerson (CRC-CE), realizada pela Secretaria de Finanças.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CRONOGRAMA ================= -->
+    <section class="tela" id="cronograma">
+      <div class="banner">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <div style="position:relative;z-index:1"><h1>Cronograma e prazos</h1><p>De 2026 a 2033 os tributos atuais dão lugar ao IBS (estados e municípios) e à CBS (União). Em cada ano, mostramos o que muda no ISS de Canindé.</p></div>
+      </div>
+      <div class="trilha">Início › Reforma Tributária › <b>Cronograma e prazos</b></div>
+
+      <div class="crono">
+        <div class="marco agora">
+          <h3>2026 <span class="tag espera">ano de teste — estamos aqui</span></h3>
+          <ul>
+            <li>CBS de 0,9% e IBS de 0,1% destacados na nota fiscal, em caráter de teste.</li>
+            <li>Até 15/10: pedido de opção pelo Simples Nacional para 2027. Até 30/10: opção pelo IBS/CBS no regime regular (prazos prorrogados).</li>
+          </ul>
+          <div class="iss"><b>ISS em Canindé:</b> nada muda na cobrança. Atenção à NFS-e no padrão nacional.</div>
+          <div class="base">Base oficial: LC 214/2025 · Resolução CGSN 194</div>
+        </div>
+        <div class="marco">
+          <h3>2027</h3>
+          <ul>
+            <li>CBS entra em vigor; PIS e Cofins são extintos. Começa o Imposto Seletivo.</li>
+            <li>IBS e CBS entram no Simples Nacional; fim do regime de caixa no Simples.</li>
+          </ul>
+          <div class="iss"><b>ISS em Canindé:</b> continua integral.</div>
+          <div class="base">Base oficial: EC 132/2023 · LC 214/2025</div>
+        </div>
+        <div class="marco">
+          <h3>2028</h3>
+          <ul><li>IBS segue com alíquota de teste.</li></ul>
+          <div class="iss"><b>ISS em Canindé:</b> último ano com alíquota integral.</div>
+        </div>
+        <div class="marco">
+          <h3>2029 a 2032</h3>
+          <ul><li>ICMS e ISS são reduzidos gradualmente (90%, 80%, 70% e 60%) e o IBS aumenta na mesma proporção.</li></ul>
+          <div class="iss"><b>ISS em Canindé:</b> alíquota diminui a cada ano. Começa a transição na forma como o IBS é repartido entre os municípios.</div>
+          <div class="base">Base oficial: EC 132/2023</div>
+        </div>
+        <div class="marco">
+          <h3>2033</h3>
+          <ul><li>ICMS e ISS são extintos. IBS e CBS passam a valer integralmente.</li></ul>
+          <div class="iss"><b>ISS em Canindé:</b> deixa de existir. O município recebe sua parte do IBS, distribuída pelo Comitê Gestor.</div>
+        </div>
+      </div>
+      <div class="pergunta-aberta"><b>Para a equipe revisar:</b> os textos do cronograma são de exemplo e precisam ser validados pela Secretaria. No sistema, cada marco terá o link direto para a norma.</div>
+    </section>
+
+    <!-- ================= FAQ + ENVIAR DÚVIDA ================= -->
+    <section class="tela" id="faq">
+      <div class="banner">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>
+        <div style="position:relative;z-index:1"><h1>Perguntas frequentes</h1><p>Respostas da equipe da Secretaria de Finanças, sempre indicando a base oficial. Não encontrou a sua? Envie pelo formulário.</p></div>
+      </div>
+      <div class="trilha">Início › Reforma Tributária › <b>Perguntas frequentes</b></div>
+
+      <div class="duas">
+        <div>
+          <div class="busca-grande">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="faq-busca" placeholder="Digite sua dúvida, ex.: MEI, Simples, nota fiscal, ISS…">
+          </div>
+          <div class="filtros" id="faq-filtros">
+            <button class="chip ativo" data-f="todos">Todos</button>
+            <button class="chip" data-f="cidadao">Cidadão</button>
+            <button class="chip" data-f="mei">MEI / Simples</button>
+            <button class="chip" data-f="empresa">Empresas</button>
+            <button class="chip" data-f="servico">Prestador de serviço</button>
+            <button class="chip" data-f="contador">Contadores</button>
+          </div>
+
+          <div id="faq-lista">
+            <details class="faq" data-p="mei empresa contador" open>
+              <summary>Sou do Simples. Até quando posso escolher o IBS/CBS pelo regime regular?<span class="tag lar">MEI / Simples</span></summary>
+              <div class="resp">Para o período de janeiro a junho de 2027, a opção pode ser feita até <b>30 de outubro de 2026</b>. Se mudar de ideia, dá para cancelar entre 3 de novembro e 20 de dezembro de 2026. Não confunda com o prazo para <b>entrar</b> no Simples, que vai até 15 de outubro.
+                <div class="base">Base oficial: Resolução CGSN 194 · CGIBS/Receita Federal, 30/09/2026</div>
+                <div class="rodape"><span>Atualizado em 02/10/2026</span><span>Esta resposta ajudou? 👍 👎</span></div></div>
+            </details>
+            <details class="faq" data-p="mei">
+              <summary>Sou MEI. O que muda para mim?<span class="tag lar">MEI / Simples</span></summary>
+              <div class="resp">O regime do MEI foi preservado: continua simplificado e com recolhimento próprio. O ponto de atenção é a formalização: emissão de nota (NFS-e para serviço) e conta bancária compatível com o que você fatura.
+                <div class="base">Base oficial: LC 214/2025</div>
+                <div class="rodape"><span>Atualizado em 02/09/2026</span><span>Esta resposta ajudou? 👍 👎</span></div></div>
+            </details>
+            <details class="faq" data-p="cidadao mei empresa servico contador">
+              <summary>O que são IBS e CBS?<span class="tag lar">Geral</span></summary>
+              <div class="resp">São os dois novos tributos sobre o consumo. A CBS é federal e substitui PIS e Cofins. O IBS é compartilhado entre estados e municípios, administrado pelo Comitê Gestor, e substitui o ICMS e o ISS.
+                <div class="base">Base oficial: EC 132/2023 · LC 214/2025</div>
+                <div class="rodape"><span>Atualizado em 10/09/2026</span><span>Esta resposta ajudou? 👍 👎</span></div></div>
+            </details>
+            <details class="faq" data-p="servico empresa">
+              <summary>Continuo pagando ISS para Canindé?<span class="tag lar">Prestador de serviço</span></summary>
+              <div class="resp">Sim. O ISS é cobrado normalmente até 2028, começa a diminuir em 2029 e é extinto em 2033.
+                <div class="base">Base oficial: EC 132/2023</div>
+                <div class="rodape"><span>Atualizado em 28/09/2026</span><span>Esta resposta ajudou? 👍 👎</span></div></div>
+            </details>
+            <details class="faq" data-p="cidadao">
+              <summary>A reforma muda o IPTU?<span class="tag lar">Cidadão</span></summary>
+              <div class="resp">O IPTU continua sendo um imposto municipal e não é substituído pelo IBS.
+                <div class="base">Base oficial: EC 132/2023</div>
+                <div class="rodape"><span>Atualizado em 20/08/2026</span><span>Esta resposta ajudou? 👍 👎</span></div></div>
+            </details>
+          </div>
+          <p class="sub" id="faq-vazio" style="display:none">Nenhuma pergunta encontrada. Envie a sua pelo formulário.</p>
+        </div>
+
+        <div class="form-card">
+          <div class="cabeca">Envie sua dúvida</div>
+          <div class="corpo">
+            <div class="campo"><label>Nome</label><input placeholder="Seu nome"></div>
+            <div class="campo"><label>E-mail (para receber a resposta)</label><input placeholder="voce@exemplo.com"></div>
+            <div class="campo"><label>Você é</label>
+              <select><option>Cidadão</option><option>MEI</option><option>Empresa do Simples Nacional</option><option>Empresa (Lucro Presumido/Real)</option><option>Contador</option><option>Servidor público</option></select></div>
+            <div class="campo"><label>Assunto</label>
+              <select><option>Simples Nacional 2027</option><option>ISS e nota de serviço</option><option>IBS e CBS — geral</option><option>IPTU e taxas</option><option>Outro</option></select></div>
+            <div class="campo"><label>Sua dúvida</label><textarea placeholder="Escreva com o máximo de detalhes possível"></textarea></div>
+            <label class="check"><input type="checkbox" checked> Autorizo publicar a resposta nas perguntas frequentes, sem meu nome.</label>
+            <button class="botao" id="enviar-duvida" style="width:100%">Enviar dúvida</button>
+            <div class="sucesso" id="sucesso">Dúvida recebida! Seu protocolo é <b>DUV-2026-00143</b>.<br>A resposta chega no seu e-mail em até 5 dias úteis.</div>
+            <p class="sub" style="margin:12px 0 0">Já enviou? <a style="color:var(--laranja);font-weight:600;cursor:pointer">Acompanhe pelo protocolo</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VÍDEOS E MATERIAIS ================= -->
+    <section class="tela" id="videos">
+      <div class="banner">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+        <div style="position:relative;z-index:1"><h1>Vídeos e materiais</h1><p>Palestras realizadas pela Secretaria em Canindé, vídeos oficiais do CGIBS e cartilhas para baixar.</p></div>
+      </div>
+      <div class="trilha">Início › Reforma Tributária › <b>Vídeos e materiais</b></div>
+      <div class="filtros">
+        <button class="chip ativo">Tudo</button><button class="chip">Palestras em Canindé</button><button class="chip">Oficiais do CGIBS</button>
+        <button class="chip">MEI / Simples</button><button class="chip">Cartilhas (PDF)</button>
+      </div>
+      <div class="video-lado" style="margin-bottom:16px;align-items:start">
+        <div class="video-card"><div class="yt" data-yt="q9dshko5nCA" style="background-image:url(https://i.ytimg.com/vi/q9dshko5nCA/hqdefault.jpg)"><span class="play">▶</span></div><div class="info"><h4>Reforma Tributária 2026: boatos que estão tirando nosso sossego</h4><div class="meta"><span class="tag oficial">Sebrae</span>enquanto a Secretaria não grava os próprios vídeos</div></div></div>
+        <div class="caixa-lateral" style="margin:0">
+          <span class="tag lar">🎧 Áudio · 19 min</span>
+          <h4 style="margin:8px 0 6px">A Reforma Tributária na rotina das empresas</h4>
+          <p style="margin:0 0 10px">Para ouvir no carro ou no celular.</p>
+          <audio controls preload="none" style="width:100%" src="materiais/audio-reforma-rotina-empresas.m4a"></audio>
+          <div class="pergunta-aberta" style="margin-top:10px">Áudio gerado por IA (Google). <b>Em revisão</b>: só vai ao ar depois que a equipe ouvir e conferir com a legislação.</div>
+        </div>
+      </div>
+      <div class="videos">
+        <div class="video"><div class="thumb slide"><div><b>REFORMA TRIBUTÁRIA<br>PARA EMPRESÁRIOS</b><br><small>MEI e Simples Nacional</small></div><span class="dur">33 slides</span></div>
+          <div class="info"><h4>Palestra: impactos, riscos e decisões para MEI e Simples Nacional</h4><div class="meta"><span class="tag lar">Palestra em Canindé</span>Prof. Tiago Emerson · slides + gravação</div></div></div>
+        <div class="video"><div class="thumb" style="background:linear-gradient(135deg,#e86f00,#f7b500)"><span class="ord">Comece aqui</span><div class="play">▶</div><span class="dur">4:12</span></div>
+          <div class="info"><h4>Reforma tributária em 4 minutos</h4><div class="meta"><span class="tag lar">Secretaria de Finanças</span></div></div></div>
+        <div class="video"><div class="thumb" style="background:linear-gradient(135deg,#1d5fa8,#3b82c4)"><span class="fonte">CGIBS</span><div class="play">▶</div><span class="dur">vídeo oficial</span></div>
+          <div class="info"><h4>Vídeos do Comitê Gestor do IBS</h4><div class="meta"><span class="tag oficial">Oficial</span>capturado de cgibs.gov.br/videos</div></div></div>
+        <div class="video"><div class="thumb" style="background:linear-gradient(135deg,#1d1d1b,#3a332a)"><div class="play">▶</div><span class="dur">12:40</span></div>
+          <div class="info"><h4>NFS-e padrão nacional, passo a passo</h4><div class="meta"><span class="tag lar">Prestador de serviço</span></div></div></div>
+        <div class="video"><div class="thumb" style="background:linear-gradient(135deg,#1e6b34,#2f8f4b)"><div class="play" style="border-radius:8px">PDF</div></div>
+          <div class="info"><h4>Guia orientativo — impactos administrativos da reforma</h4><div class="meta"><span class="tag oficial">Oficial</span>CGIBS · guia em PDF</div></div></div>
+        <div class="video"><div class="thumb" style="background:linear-gradient(135deg,#9a4a00,#e86f00)"><div class="play" style="border-radius:8px">PDF</div></div>
+          <div class="info"><h4>Checklist: dados para decidir entre Simples puro e híbrido</h4><div class="meta"><span class="tag lar">Secretaria de Finanças</span>1 página</div></div></div>
+      </div>
+      <div class="pergunta-aberta"><b>A decidir:</b> (1) os vídeos da Secretaria ficam no YouTube da Prefeitura e o portal só mostra, ou sobem direto no portal? (2) Temos autorização do Prof. Tiago Emerson para publicar os slides e a gravação da palestra?</div>
+    </section>
+
+    <!-- ================= CONEXÃO EMPRESARIAL (público) ================= -->
+    <section class="tela" id="evento">
+      <div class="trilha">Início › Fale com a Secretaria › <b>Conexão Empresarial Canindé</b></div>
+      <div class="evento-topo">
+        <img src="img/conexao-empresarial.webp" alt="Conexão Empresarial Canindé — Carlos Alencar e Tiago Emerson">
+        <div>
+          <span class="tag lar">Evento realizado em 19/09/2026</span>
+          <h1>Conexão Empresarial Canindé: suas perguntas respondidas</h1>
+          <p>Na inscrição do evento, os participantes deixaram dúvidas sobre a Reforma Tributária. Agrupamos as perguntas por tema e a Secretaria de Finanças responde cada um deles, sempre com a base na lei.</p>
+          <div class="numeros">
+            <div><b>149</b>participantes inscritos</div>
+            <div><b>24</b>perguntas enviadas</div>
+            <div><b>6</b>temas respondidos</div>
+          </div>
+        </div>
+      </div>
+      <div class="filtros" id="filtro-temas"></div>
+      <div id="temas-evento"></div>
+      <div class="caixa-lateral" style="margin-top:14px">
+        <h4>Participou do evento e ficou com outra dúvida?</h4>
+        <p>Envie pelo formulário de dúvidas. Você recebe um protocolo e a resposta por e-mail.</p>
+        <button class="botao peq" data-ir="faq">Enviar nova dúvida</button>
+      </div>
+    </section>
+
+    <!-- ================= SERVIÇOS ONLINE ================= -->
+    <section class="tela" id="servicos">
+      <div class="banner">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20M7 14h4"/></svg>
+        <div style="position:relative;z-index:1"><h1>Serviços online da Secretaria de Finanças</h1><p>Emita nota fiscal, boleto do IPTU e certidão sem ir à Prefeitura. Os serviços abrem no sistema tributário do município.</p></div>
+      </div>
+      <div class="trilha">Início › <b>Serviços online</b></div>
+
+      <h2 class="secao" style="margin-top:6px">Fale com a Arrecadação</h2>
+      <p class="sub">Resolva pela internet ou procure o atendimento presencial.</p>
+      <div class="atendimento">
+        <div class="at-item"><span class="ic">📍</span><div><b>Atendimento presencial</b><small>Diretoria de Arrecadação · seg. a qui., 7h30 às 17h · sex., 7h30 às 13h30</small><p>Rua Valdery Uchoa, 597 (esquina com a Rua Gervásio Martins, 134) · Centro · Canindé-CE · 62700-000</p><a href="https://www.google.com/maps/search/?api=1&query=Rua+Valdery+Uchoa%2C+597%2C+Centro%2C+Caninde+CE" target="_blank" rel="noopener">Ver no mapa ↗</a></div></div>
+        <div class="at-item"><span class="ic">✉️</span><div><b>E-mail</b><small>atendimento digital</small><p><a href="mailto:setortributoscaninde@gmail.com">setortributoscaninde@gmail.com</a></p></div></div>
+        <div class="at-item"><span class="ic">📞</span><div><b>Telefone</b><small>Setor de Tributos</small><p><a href="tel:+5585981934279">(85) 9 8193-4279</a></p></div></div>
+        <div class="at-item"><span class="ic">💻</span><div><b>Portal de Serviços de Canindé</b><small>sem sair de casa</small><p>2ª via do IPTU e de tributos, regularização de débitos e emissão de guias (DAM).</p><a href="https://servicos2.speedgov.com.br/caninde" target="_blank" rel="noopener">Acessar o portal ↗</a></div></div>
+      </div>
+
+      <div class="servico-online">
+        <div class="ic">🏠</div>
+        <div>
+          <h3>2ª via do IPTU</h3>
+          <p>Imprima o boleto do IPTU informando a <b>inscrição do imóvel</b> ou o <b>CPF/CNPJ</b> do proprietário.</p>
+          <div class="aviso boa">💳 <span><b>Novidade:</b> o IPTU agora pode ser pago com <b>cartão de crédito</b>.</span></div>
+          <div class="local" style="margin-top:8px;font-size:12.5px;background:var(--amarelo-claro);border:1px dashed #e0a800;border-radius:6px;padding:6px 10px;color:#5a4200"><b>A confirmar:</b> como pagar no cartão (no próprio boleto, pelo link, ou no balcão?), se dá para parcelar e se há acréscimo.</div>
+        </div>
+        <div><a class="botao" href="https://servicos2.speedgov.com.br/caninde/segunda_via/iptu" target="_blank" rel="noopener">Emitir 2ª via ↗</a><div class="externo">sistema da Prefeitura</div></div>
+      </div>
+
+      <div class="servico-online">
+        <div class="ic">🧾</div>
+        <div>
+          <h3>Emissão de nota fiscal de serviço — ISS Eletrônico de Canindé</h3>
+          <p>Sistema próprio do município para emitir NFS-e. Entrada separada para <b>empresa/autônomo</b> e para <b>contador/procurador</b>.</p>
+          <div class="aviso mudanca">⚠ <span><b>Mudança em breve:</b> o ISS Eletrônico de Canindé vai atender <b>apenas empresas não optantes pelo Simples Nacional</b>. Empresas do Simples Nacional passarão a emitir pelo <b>Emissor Nacional da NFS-e</b>. <a data-ir="nfse-inicio" style="font-weight:700;text-decoration:underline;cursor:pointer">Prepare-se agora</a></span></div>
+        </div>
+        <div><a class="botao" href="https://iss.speedgov.com.br/caninde/login" target="_blank" rel="noopener">Acessar o ISS Eletrônico ↗</a><div class="externo">sistema da Prefeitura</div></div>
+      </div>
+
+      <div class="servico-online">
+        <div class="ic">🇧🇷</div>
+        <div>
+          <h3>Emissor Nacional da NFS-e</h3>
+          <p>Emissor do governo federal para a nota fiscal de serviço no padrão nacional. Já usado pelo <b>MEI</b>, e é para onde vão as <b>empresas do Simples Nacional</b> de Canindé.</p>
+          <div class="aviso boa">📘 <span>Primeira vez? Veja antes o <a data-ir="nfse-inicio" style="font-weight:700;text-decoration:underline;cursor:pointer">passo a passo da Secretaria</a>.</span></div>
+        </div>
+        <div><a class="botao" href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener">Acessar o Emissor Nacional ↗</a><div class="externo">site do governo federal</div></div>
+      </div>
+
+      <div class="servico-online">
+        <div class="ic">📄</div>
+        <div>
+          <h3>Certidão da empresa (cadastro econômico)</h3>
+          <p>Emita a certidão da sua empresa informando a <b>inscrição econômica</b> e o <b>CPF/CNPJ</b>.</p>
+          <ul><li>A inscrição econômica é o número do cadastro da empresa na Prefeitura de Canindé.</li></ul>
+        </div>
+        <div><a class="botao" href="https://servicos2.speedgov.com.br/caninde/pages/certidao_economico" target="_blank" rel="noopener">Emitir certidão ↗</a><div class="externo">sistema da Prefeitura</div></div>
+      </div>
+
+      <div class="servico-online">
+        <div class="ic">💰</div>
+        <div>
+          <h3>Regularização de débitos e emissão de guias (DAM)</h3>
+          <p>Consulte e regularize débitos com a Prefeitura e emita o Documento de Arrecadação Municipal (DAM) pelo Portal de Serviços de Canindé.</p>
+          <ul><li>Com o <b>acesso com senha</b> do portal você vê todos os seus boletos, extratos, imóveis e empresas e faz requisições eletrônicas.</li></ul>
+        </div>
+        <div><a class="botao" href="https://servicos2.speedgov.com.br/caninde" target="_blank" rel="noopener">Abrir o Portal de Serviços ↗</a><div class="externo">sistema da Prefeitura</div></div>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         AMBIENTE NFS-e NACIONAL (módulo próprio)
+         ===================================================== -->
+
+    <!-- ===== NFS-e: início ===== -->
+    <section class="tela" id="nfse-inicio">
+      <div class="banner nfse">
+        <div style="position:relative;z-index:1">
+          <span class="selo-nfse">NFS-e NACIONAL</span>
+          <h1>Canindé vai emitir nota de serviço pelo Emissor Nacional</h1>
+          <p>Tudo o que o prestador de serviço precisa para se preparar: primeiro acesso, configuração, emissão passo a passo, correção de notas e atendimento da Secretaria de Finanças.</p>
+          <div class="contagem">
+            <div>Início em Canindé<b id="nfse-data">a definir</b></div>
+            <div>Você já pode<b>fazer o cadastro</b></div>
+            <div>Atendimento<b>presencial e online</b></div>
+          </div>
+          <a class="botao" href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener" style="margin-top:14px;background:var(--amarelo);color:#111">Acessar o Emissor Nacional ↗</a>
+        </div>
+      </div>
+
+      <h2 class="secao">Onde eu emito a nota?</h2>
+      <p class="sub">Hoje Canindé tem dois emissores. Veja qual é o seu.</p>
+      <div class="qual-emissor">
+        <div style="border-top:4px solid var(--amarelo)"><h4>Empresa do Simples Nacional</h4><p>Vai passar a emitir pelo <b>Emissor Nacional</b>. Faça o cadastro agora para não ser pego de surpresa.</p><a class="onde" data-ir="nfse-acesso" style="cursor:pointer;color:var(--laranja)">Como fazer o primeiro acesso ➜</a><br><a class="onde" href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener" style="color:var(--laranja);margin-top:4px">Acessar o Emissor Nacional ↗</a></div>
+        <div style="border-top:4px solid var(--preto)"><h4>Empresa não optante pelo Simples</h4><p>Continua emitindo no <b>ISS Eletrônico de Canindé</b>.</p><a class="onde" href="https://iss.speedgov.com.br/caninde/login" target="_blank" rel="noopener" style="color:var(--laranja)">Acessar o ISS Eletrônico ↗</a></div>
+        <div style="border-top:4px solid var(--parado)"><h4>MEI</h4><p>Emite pelo <b>Emissor Nacional</b> (web ou aplicativo).</p><a class="onde" data-ir="nfse-emitir" style="cursor:pointer;color:var(--laranja)">Ver o passo a passo ➜</a><br><a class="onde" href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener" style="color:var(--laranja);margin-top:4px">Acessar o Emissor Nacional ↗</a></div>
+      </div>
+      <div class="aviso mudanca">⚠ <span>Até a data de mudança ser anunciada, <b>continue emitindo onde você emite hoje</b>. Data em que o Simples Nacional passa para o Emissor Nacional em Canindé: <b>a definir pela Secretaria</b>.</span></div>
+
+      <h2 class="secao">Qual é o seu caso?</h2>
+      <p class="sub">Escolha o seu perfil para ver o caminho mais curto.</p>
+      <div class="perfis" id="perfis">
+        <div class="perfil" data-rota="mei"><div class="ico">🧰</div><h4>Sou MEI</h4><p>Emissão simplificada, pelo computador ou pelo celular.</p></div>
+        <div class="perfil" data-rota="empresa"><div class="ico">🏢</div><h4>Sou empresa</h4><p>Simples Nacional, Lucro Presumido ou Real. Emissão completa.</p></div>
+        <div class="perfil" data-rota="autonomo"><div class="ico">👤</div><h4>Sou autônomo</h4><p>Profissional pessoa física que presta serviço com CPF.</p></div>
+        <div class="perfil" data-rota="contador"><div class="ico">📊</div><h4>Sou contador</h4><p>Vou preparar meus clientes e emitir por eles.</p></div>
+        <div class="perfil" data-rota="tomador"><div class="ico">🧾</div><h4>Recebo notas</h4><p>Contrato serviços e quero conferir as notas que recebo.</p></div>
+      </div>
+      <div class="rota" id="rota"></div>
+
+      <h2 class="secao">Estou pronto para emitir?</h2>
+      <p class="sub">Marque o que você já fez. O portal guarda o seu progresso neste aparelho.</p>
+      <div class="duas">
+        <div>
+          <div class="progresso"><i id="prog-barra" style="width:0%"></i></div>
+          <div class="checklist" id="checklist">
+            <label class="item-check"><input type="checkbox" data-k="docs"><div><b>Separei os dados de cadastro</b><p>CPF ou CNPJ, data de nascimento do responsável, número do título de eleitor e, se declarou Imposto de Renda, os números dos recibos dos dois últimos anos.</p></div></label>
+            <label class="item-check"><input type="checkbox" data-k="acesso"><div><b>Fiz o primeiro acesso no Emissor Nacional</b><p>Criei usuário e senha (ou entrei com certificado digital ou gov.br, se for MEI). <a data-ir="nfse-acesso">Como fazer</a></p></div></label>
+            <label class="item-check"><input type="checkbox" data-k="config"><div><b>Configurei o emissor</b><p>Preenchi e-mail, telefone e a opção de valor aproximado dos tributos em “Configurações”.</p></div></label>
+            <label class="item-check"><input type="checkbox" data-k="codigo"><div><b>Sei qual é o código do meu serviço</b><p>Conferi com meu contador o Código de Tributação Nacional da minha atividade.</p></div></label>
+            <label class="item-check"><input type="checkbox" data-k="favoritos"><div><b>Cadastrei meus serviços favoritos</b><p>Obrigatório para quem vai usar a emissão simplificada ou o aplicativo.</p></div></label>
+            <label class="item-check"><input type="checkbox" data-k="emiti"><div><b>Treinei a emissão</b><p>Segui o passo a passo e sei onde ficam as notas emitidas, como baixar o PDF e como corrigir. <a data-ir="nfse-emitir">Passo a passo</a></p></div></label>
+          </div>
+          <p class="sub" id="prog-msg" style="margin-top:10px"></p>
+        </div>
+        <div>
+          <div class="caixa-lateral" style="border:2px solid var(--amarelo)">
+            <h4>Não conseguiu criar o acesso?</h4>
+            <p>Se os seus dados não batem com os da Receita ou você não tem título de eleitor nem recibos do IR, a <b>Diretoria de Arrecadação</b> (Rua Valdery Uchoa, 597, Centro, seg. a qui., 7h30 às 17h · sex., 7h30 às 13h30) faz o seu cadastro presencialmente.</p>
+            <button class="botao peq preto" data-ir="nfse-acesso" style="margin-top:8px">Agendar atendimento</button>
+          </div>
+          <div class="caixa-lateral">
+            <h4>Próximas oficinas</h4>
+            <div class="turmas">
+              <div class="turma"><div class="dt"><b>14</b><small>OUT</small></div><div class="txt">Primeiro acesso e configuração<small>Auditório da Secretaria · 9h · MEI</small></div></div>
+              <div class="turma"><div class="dt"><b>21</b><small>OUT</small></div><div class="txt">Emissão completa na prática<small>Laboratório · 14h · empresas e contadores</small></div></div>
+            </div>
+            <button class="botao peq vazio" data-ir="nfse-materiais" style="margin-top:10px">Ver agenda completa</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="downloads" style="margin-top:22px">
+        <a class="download" data-ir="nfse-guia" style="cursor:pointer;border:2px solid var(--amarelo)"><span class="pdf" style="background:var(--preto)">📷</span><span><b>Guia ilustrado: tela por tela</b><small>39 passos com as telas reais do Emissor Nacional, do cadastro à nota emitida</small></span><span class="baixar">Abrir ➜</span></a>
+        <a class="download" href="materiais/guia-oficial-emissor-nacional-web-v1.2.pdf" target="_blank" download><span class="pdf">PDF</span><span><b>Guias oficiais em PDF</b><small>Guia do Emissor Nacional v1.2 e e-book Sebrae/Receita</small></span><span class="baixar">Baixar ⬇</span></a>
+      </div>
+
+      <h2 class="secao">Assista antes de começar</h2>
+      <p class="sub">Vídeos oficiais do Sebrae, na ordem em que você vai usar. A Secretaria vai gravar versões com o caso de Canindé.</p>
+      <div class="trilha-videos">
+        <div class="video-card"><div class="yt" data-yt="jCf0QQ4n7xc" style="background-image:url(https://i.ytimg.com/vi/jCf0QQ4n7xc/hqdefault.jpg)"><span class="ord">1 · Cadastro</span><span class="play">▶</span></div><div class="info"><h4>Cadastro no Portal Nacional de Emissão de NFS-e — passo a passo</h4><div class="meta"><span class="tag oficial">Sebrae</span>todos os prestadores</div></div></div>
+        <div class="video-card"><div class="yt" data-yt="Oxf-l9-Mh1o" style="background-image:url(https://i.ytimg.com/vi/Oxf-l9-Mh1o/hqdefault.jpg)"><span class="ord">2 · Emissor Web</span><span class="play">▶</span></div><div class="info"><h4>Emissão de NFS-e pelo Emissor Web — passo a passo</h4><div class="meta"><span class="tag oficial">Sebrae</span>computador</div></div></div>
+        <div class="video-card"><div class="yt" data-yt="Z152-eXvOMA" style="background-image:url(https://i.ytimg.com/vi/Z152-eXvOMA/hqdefault.jpg)"><span class="ord">3 · Aplicativo</span><span class="play">▶</span></div><div class="info"><h4>Emissão de NFS-e pelo app NFS-e Mobile — passo a passo</h4><div class="meta"><span class="tag oficial">Sebrae</span>celular · MEI</div></div></div>
+      </div>
+
+      <h2 class="secao">O caminho, do cadastro à nota</h2>
+      <p class="sub">&nbsp;</p>
+      <div class="passos">
+        <div class="passo" data-ir="nfse-acesso" style="cursor:pointer"><div class="n">1</div><h4>Primeiro acesso</h4><p>Crie seu usuário em nfse.gov.br/EmissorNacional.</p></div>
+        <div class="passo" data-ir="nfse-acesso" style="cursor:pointer"><div class="n">2</div><h4>Configurações</h4><p>Contato e forma de exibir os tributos.</p></div>
+        <div class="passo" data-ir="nfse-emitir" style="cursor:pointer"><div class="n">3</div><h4>Emitir</h4><p>Pessoas, serviço, valores e conferência.</p></div>
+        <div class="passo" data-ir="nfse-depois" style="cursor:pointer"><div class="n">4</div><h4>Depois de emitir</h4><p>Baixar, corrigir, cancelar e conferir notas recebidas.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== NFS-e: primeiro acesso ===== -->
+    <section class="tela" id="nfse-acesso">
+      <div class="banner nfse">
+        <div style="position:relative;z-index:1"><span class="selo-nfse">NFS-e NACIONAL · PASSO 1</span><h1>Primeiro acesso ao Emissor Nacional</h1><p>Antes de emitir a primeira nota é preciso criar o acesso em <b>nfse.gov.br/EmissorNacional</b>. Para usar o aplicativo, o cadastro no site vem primeiro.</p>
+          <a class="botao" href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener" style="margin-top:12px;background:var(--amarelo);color:#111">Abrir o Emissor Nacional ↗</a></div>
+      </div>
+      <div class="trilha">NFS-e Nacional › <b>Primeiro acesso</b></div>
+
+      <div class="bloco">
+        <div class="video-lado">
+          <div class="yt" data-yt="jCf0QQ4n7xc" style="background-image:url(https://i.ytimg.com/vi/jCf0QQ4n7xc/hqdefault.jpg)"><span class="play">▶</span></div>
+          <div><span class="tag oficial">Vídeo Sebrae</span><h3 style="margin:8px 0 6px;font-size:18px">Veja o cadastro sendo feito</h3><p class="sub" style="margin:0">Do “Fazer primeiro acesso” até o código de confirmação no e-mail.</p></div>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <h3>Escolha como entrar</h3>
+        <p class="sub">São três formas de acesso. Quanto maior o nível, mais funções ficam liberadas.</p>
+        <div class="acessos">
+          <div class="acesso destaque"><span class="nivel">Nível 1 · recomendado</span><h4>Usuário e senha</h4>
+            <p>Clique em <b>“Fazer primeiro acesso”</b> e tenha em mãos:</p>
+            <ul><li>CPF ou CNPJ</li><li>Data de nascimento do responsável</li><li>Número do título de eleitor</li><li>Se declarou IR: números dos recibos dos 2 últimos anos</li><li>Um e-mail que você acessa (chega um código de confirmação)</li></ul></div>
+          <div class="acesso"><span class="nivel">Nível 2</span><h4>Cadastro presencial na Prefeitura</h4>
+            <p>Para quem não conseguiu pelo site. A Secretaria confere seus documentos e libera o acesso. No primeiro login, o sistema pede para trocar a senha.</p></div>
+          <div class="acesso"><span class="nivel">Nível 3</span><h4>Certificado digital</h4>
+            <p>Quem tem certificado digital entra direto, sem cadastro de senha e sem ir à Prefeitura.</p></div>
+          <div class="acesso"><span class="nivel">Só para MEI</span><h4>Conta gov.br</h4>
+            <p>Aceita conta <b>prata ou ouro</b>. A conta bronze não é aceita. O CPF é ligado automaticamente ao CNPJ do MEI.</p></div>
+        </div>
+        <div class="base">Fonte: Guia do Emissor Público Nacional Web, v1.2 (Receita Federal / Comitê Gestor da NFS-e), itens 1.1 e 10</div>
+      </div>
+
+      <div class="bloco">
+        <h3>Depois de entrar: configure o emissor</h3>
+        <p class="sub">O menu “Configurações” deve ser o primeiro a ser acessado.</p>
+        <div class="campo-guia"><div class="nome">E-mail e telefone<small>opcionais</small></div>
+          <div><p>São usados nas notas que você emitir. Só aparecem no PDF da nota (DANFSe) quando não existirem no cadastro oficial.</p></div></div>
+        <div class="campo-guia"><div class="nome">Valor aproximado dos tributos<small>Lei 12.741/2012</small></div>
+          <div><p>Define como a nota mostra o total aproximado de tributos federais, estaduais e municipais.</p>
+            <div class="local"><b>Orientação da Secretaria (a definir):</b> o e-book do Sebrae/Receita orienta marcar “Não informar nenhum valor estimado”; outros guias dizem que a informação é obrigatória. A Secretaria precisa fixar a orientação para Canindé.</div></div></div>
+        <div class="campo-guia"><div class="nome">Serviços favoritos<small>MEI e aplicativo</small></div>
+          <div><p>Cadastre os serviços que você mais presta: um apelido, o Código de Tributação Nacional, o item da NBS e a descrição. A emissão simplificada e o aplicativo só mostram serviços favoritos.</p></div></div>
+      </div>
+
+      <div class="duas">
+        <div class="bloco" style="margin:0">
+          <h3>Agende seu cadastro presencial</h3>
+          <p class="sub">Para quem não conseguiu criar o acesso pelo site ou está com o cadastro bloqueado.</p>
+          <div class="campo"><label>CPF ou CNPJ</label><input placeholder="000.000.000-00"></div>
+          <div class="campo"><label>Nome</label><input></div>
+          <div class="campo"><label>Motivo</label><select><option>Não consegui fazer o primeiro acesso</option><option>Data de nascimento ou dados não conferem</option><option>Não tenho título de eleitor nem recibos do IR</option><option>Meu cadastro aparece como bloqueado</option><option>Esqueci a senha e não acesso mais o e-mail</option></select></div>
+          <div class="campo"><label>Melhor dia</label><select><option>Seg 06/10 · manhã</option><option>Ter 07/10 · tarde</option><option>Qua 08/10 · manhã</option></select></div>
+          <button class="botao preto" id="agendar">Agendar</button>
+          <div class="sucesso" id="agendado">Agendado! Compareça à <b>Diretoria de Arrecadação</b> (seg. a qui., 7h30 às 17h · sex., 7h30 às 13h30): Rua Valdery Uchoa, 597 (esquina com a Rua Gervásio Martins, 134) · Centro · Canindé-CE · 62700-000. Leve documento com foto e, se for empresa, o contrato social ou o certificado do MEI. <span id="docs-local">(lista de documentos a definir pela Secretaria)</span></div>
+        </div>
+        <div class="caixa-lateral">
+          <h4>Esqueceu a senha?</h4>
+          <p>No Emissor Nacional, use “Esqueci minha senha”. O sistema pede os mesmos dados do primeiro acesso e envia o link para um dos e-mails cadastrados.</p>
+          <h4 style="margin-top:14px">Cadastro bloqueado?</h4>
+          <p>Se aparecer aviso de bloqueio no cadastro (CNC), o sistema deixa entrar mas não emite. Procure a Secretaria de Finanças.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== NFS-e: emitir ===== -->
+    <section class="tela" id="nfse-emitir">
+      <div class="banner nfse">
+        <div style="position:relative;z-index:1"><span class="selo-nfse">NFS-e NACIONAL · PASSO A PASSO</span><h1>Emitindo a nota, campo a campo</h1><p>A emissão completa tem quatro telas. Veja o que significa cada campo e o que preencher em Canindé.</p></div>
+      </div>
+      <div class="trilha">NFS-e Nacional › <b>Emitir a nota</b></div>
+
+      <div class="decisao" style="margin-bottom:16px">
+        <div><h4>Emissão simplificada</h4><p>Para <b>MEI</b>. Poucos campos: escolhe o serviço favorito, o cliente e o valor. Também dá para emitir pelo aplicativo <b>NFS-e Mobile</b> (App Store e Google Play).</p></div>
+        <div><h4>Emissão completa</h4><p>Para <b>todos</b>. Obrigatória em alguns casos, como exportação de serviço e serviço em que o ISS é devido no município do cliente. É a que está detalhada abaixo.</p></div>
+      </div>
+
+      <div class="bloco">
+        <div class="video-lado">
+          <div class="yt" data-yt="Oxf-l9-Mh1o" style="background-image:url(https://i.ytimg.com/vi/Oxf-l9-Mh1o/hqdefault.jpg)"><span class="play">▶</span></div>
+          <div><span class="tag oficial">Vídeo Sebrae</span><h3 style="margin:8px 0 6px;font-size:18px">A emissão no Emissor Web, do início ao fim</h3><p class="sub" style="margin:0 0 10px">Assista e depois use o guia abaixo, campo a campo.</p>
+            <p class="sub" style="margin:0">Vai emitir pelo celular? <a class="yt-link" data-yt-alvo="Z152-eXvOMA" style="color:var(--laranja);font-weight:600;cursor:pointer">Ver o vídeo do aplicativo NFS-e Mobile</a></p></div>
+        </div>
+      </div>
+
+      <div class="aviso boa" style="margin-bottom:14px">📷 <span>Prefere ver as telas? Abra o <a data-ir="nfse-guia" style="font-weight:700;text-decoration:underline;cursor:pointer">guia ilustrado, tela por tela</a>.</span></div>
+
+      <div class="passos-tab" id="passos-tab">
+        <button class="ativo" data-p="1"><b>1</b>Pessoas</button>
+        <button data-p="2"><b>2</b>Serviço</button>
+        <button data-p="3"><b>3</b>Valores</button>
+        <button data-p="4"><b>4</b>Emitir</button>
+      </div>
+
+      <div class="passo-conteudo ativo" data-p="1">
+        <div class="campo-guia"><div class="nome">Data de competência<small>obrigatório</small></div>
+          <div><p>Data em que o serviço foi <b>prestado</b>, e não necessariamente a data de hoje.</p></div></div>
+        <div class="campo-guia"><div class="nome">Informar série e número da DPS<small>opcional</small></div>
+          <div><p>A DPS é a “declaração” que vira nota. O emissor numera sozinho.</p>
+            <div class="preencha">Deixe <b>desmarcado</b>. Se marcar, passa a ser obrigatório preencher série e número.</div></div></div>
+        <div class="campo-guia"><div class="nome">Emitente da NFS-e<small>obrigatório</small></div>
+          <div><p>Quem está emitindo: Prestador, Tomador ou Intermediário.</p>
+            <div class="preencha">Marque <b>Prestador</b>. Hoje só o prestador pode emitir.</div></div></div>
+        <div class="campo-guia"><div class="nome">Seus dados<small>automáticos</small></div>
+          <div><p>Nome, endereço, inscrição municipal e opção pelo Simples vêm do cadastro da Receita Federal e do município.</p>
+            <div class="atencao">Se algum dado estiver errado, ele não se corrige na nota. Atualize o cadastro na Receita ou procure a Secretaria.</div></div></div>
+        <div class="campo-guia"><div class="nome">Regime de apuração (Simples)<small>quando aparecer</small></div>
+          <div><p>Se os tributos são apurados pelo Simples Nacional ou pela própria nota.</p>
+            <div class="preencha">Confirme com seu contador antes de escolher.</div></div></div>
+        <div class="campo-guia"><div class="nome">Tomador do serviço<small>o seu cliente</small></div>
+          <div><p>Escolha Brasil ou Exterior e digite o CPF ou CNPJ. O nome aparece sozinho.</p></div></div>
+        <div class="campo-guia"><div class="nome">Intermediário<small>raro</small></div>
+          <div><p>Só quando uma agência ou plataforma intermediou o serviço.</p>
+            <div class="preencha">Na maioria dos casos: <b>“Intermediário não informado”</b>.</div></div></div>
+      </div>
+
+      <div class="passo-conteudo" data-p="2">
+        <div class="campo-guia"><div class="nome">Local da prestação<small>obrigatório</small></div>
+          <div><p>País e município onde o serviço foi <b>concluído</b>. Digite 3 letras do município para buscar.</p>
+            <div class="atencao">Define para qual município vai o ISS em alguns serviços. Não deixe “Canindé” por hábito se o serviço foi feito em outra cidade.</div></div></div>
+        <div class="campo-guia"><div class="nome">Código de Tributação Nacional<small>obrigatório</small></div>
+          <div><p>Classificação do serviço, igual em todo o Brasil. Digite 3 caracteres para buscar na lista nacional.</p>
+            <div class="atencao">É o campo que mais gera erro. Confirme o código com o contador. Não copie código de exemplo de tutorial.</div>
+            <div class="local"><b>Canindé:</b> a Secretaria vai publicar uma tabela “atividade → código nacional” para as atividades mais comuns do município (a preparar).</div></div></div>
+        <div class="campo-guia"><div class="nome">Código complementar do município<small>se houver</small></div>
+          <div><p>Detalhamento que cada município pode criar dentro do código nacional.</p>
+            <div class="local"><b>Canindé:</b> informar se o município vai usar códigos complementares (a definir).</div></div></div>
+        <div class="campo-guia"><div class="nome">Imunidade, exportação ou não incidência<small>obrigatório</small></div>
+          <div><p>Se o serviço tem alguma situação especial de ISS.</p>
+            <div class="preencha">Na maioria dos casos: <b>nenhuma</b>. Em caso especial, confirme com o contador.</div></div></div>
+        <div class="campo-guia"><div class="nome">Descrição do serviço<small>obrigatório</small></div>
+          <div><p>Texto livre, claro e objetivo.</p>
+            <div class="preencha">Exemplo: “Manutenção elétrica no estabelecimento do cliente, realizada em 15/10/2026”.</div></div></div>
+        <div class="campo-guia"><div class="nome">Serviço de obra<small>construção civil</small></div>
+          <div><p>Informe o endereço da obra ou o número do <b>CNO</b> (Cadastro Nacional de Obras da Receita Federal).</p></div></div>
+      </div>
+
+      <div class="passo-conteudo" data-p="3">
+        <div class="campo-guia"><div class="nome">Valor do serviço<small>obrigatório</small></div>
+          <div><p>Valor total cobrado do cliente. É a base para o cálculo dos tributos.</p></div></div>
+        <div class="campo-guia"><div class="nome">Descontos<small>opcionais</small></div>
+          <div><p><b>Incondicionado:</b> dado sem condição; reduz a base do ISS. <b>Condicionado:</b> depende de algo depois da emissão (ex.: pagar até tal dia); não reduz a base.</p></div></div>
+        <div class="campo-guia"><div class="nome">Regime especial de tributação<small>obrigatório</small></div>
+          <div><p>Opções como Nenhum, Ato cooperado e Sociedade de profissionais.</p>
+            <div class="preencha">A maioria dos prestadores marca <b>Nenhum</b>. Sociedade de profissionais só para quem paga ISS fixo.</div></div></div>
+        <h3 style="margin:16px 0 4px;font-size:15.5px">As três perguntas sobre o ISS</h3>
+        <div class="perguntas-iss">
+          <div><h5>A exigibilidade do ISS está suspensa?</h5><span class="resp-padrao">Normalmente: NÃO</span><p>Só “sim” com decisão judicial ou processo administrativo.</p></div>
+          <div><h5>Há retenção do ISS pelo tomador?</h5><span class="resp-padrao">Normalmente: NÃO</span><p>Alguns serviços prestados a empresas podem ter retenção, conforme a lei municipal.</p></div>
+          <div><h5>O serviço tem benefício municipal?</h5><span class="resp-padrao">Normalmente: NÃO</span><p>Só se houver incentivo fiscal previsto em lei de Canindé.</p></div>
+        </div>
+        <div class="campo-guia"><div class="nome">Alíquota do ISS<small>calculada</small></div>
+          <div><p>O sistema aplica a alíquota cadastrada pelo município para o código escolhido e calcula o ISS.</p>
+            <div class="local"><b>Canindé:</b> publicar aqui a tabela de alíquotas e os casos de retenção na fonte previstos no Código Tributário Municipal (a preencher pela Secretaria).</div></div></div>
+        <div class="campo-guia"><div class="nome">Tributação federal<small>PIS, Cofins, CSLL, IRRF, INSS</small></div>
+          <div><p>Retenções federais dependem do tipo de cliente e do serviço.</p>
+            <div class="atencao">Não use percentuais de tutoriais sem conferir. Defina com o contador.</div></div></div>
+      </div>
+
+      <div class="passo-conteudo" data-p="4">
+        <div class="campo-guia"><div class="nome">Conferência<small>resumo</small></div>
+          <div><p>O emissor mostra um resumo de tudo e o cálculo do imposto. Dá para voltar em <b>Editar Pessoas</b>, <b>Editar Serviço</b> ou <b>Editar Tributação</b>.</p>
+            <div class="preencha">Confira o valor líquido e as retenções antes de clicar em <b>Emitir NFS-e</b>.</div></div></div>
+        <div class="campo-guia"><div class="nome">Nota gerada<small>pronto</small></div>
+          <div><p>Aparece a <b>chave de acesso</b> da nota. Dali você baixa o PDF (DANFSe) e o arquivo XML para enviar ao cliente.</p></div></div>
+        <div class="campo-guia"><div class="nome">Caiu a internet?<small>rascunho</small></div>
+          <div><p>O emissor salva um rascunho a cada 5 segundos. Retome em “Rascunhos” de onde parou.</p></div></div>
+      </div>
+      <div class="base">Fontes: Guia do Emissor Público Nacional Web v1.2, item 4 · E-book “Passo a passo: cadastramento e emissão de NFS-e” (Sebrae/Receita Federal, fev/2023)</div>
+    </section>
+
+    <!-- ===== NFS-e: guia ilustrado (conteúdo dos PDFs oficiais) ===== -->
+    <section class="tela" id="nfse-guia">
+      <div class="banner nfse">
+        <div style="position:relative;z-index:1">
+          <span class="selo-nfse">NFS-e NACIONAL · GUIA ILUSTRADO</span>
+          <h1>Como emitir a nota fiscal no Emissor Nacional, tela por tela</h1>
+          <p>Passo a passo com as telas reais do sistema, tirado dos guias oficiais do Sistema Nacional da NFS-e e do Sebrae/Receita Federal. Clique em qualquer imagem para ampliar.</p>
+          <a class="botao" href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener" style="margin-top:14px;background:var(--amarelo);color:#111">Abrir o Emissor Nacional ↗</a>
+        </div>
+      </div>
+      <div class="trilha">NFS-e Nacional › <b>Guia ilustrado</b></div>
+
+      <div class="downloads">
+        <a class="download" href="materiais/guia-oficial-emissor-nacional-web-v1.2.pdf" target="_blank" download>
+          <span class="pdf">PDF</span><span><b>Guia do Emissor Público Nacional Web — v1.2</b><small>Oficial · Sistema Nacional NFS-e · 104 páginas · 4,6 MB</small></span><span class="baixar">Baixar ⬇</span></a>
+        <a class="download" href="materiais/ebook-sebrae-rfb-cadastro-emissao-nfse.pdf" target="_blank" download>
+          <span class="pdf">PDF</span><span><b>Passo a passo: cadastramento e emissão de NFS-e</b><small>Sebrae / Receita Federal · web e celular · 23 páginas · 7,7 MB</small></span><span class="baixar">Baixar ⬇</span></a>
+      </div>
+
+      <div class="sumario"><a href="#guia-a" class="sum-item" data-ancora="guia-a"><b>1</b>Primeiro acesso<small>8 passos</small></a><a href="#guia-b" class="sum-item" data-ancora="guia-b"><b>2</b>Configurar o emissor<small>6 passos</small></a><a href="#guia-c" class="sum-item" data-ancora="guia-c"><b>3</b>Emitir a nota (emissão completa)<small>12 passos</small></a><a href="#guia-d" class="sum-item" data-ancora="guia-d"><b>4</b>Emitir pelo celular (aplicativo NFS-e Mobile)<small>6 passos</small></a><a href="#guia-e" class="sum-item" data-ancora="guia-e"><b>5</b>Depois de emitir<small>7 passos</small></a></div>
+
+      <div class="bloco" id="guia-a">
+        <h3>1. Primeiro acesso</h3>
+        <p class="sub">Criar o seu usuário no Emissor Nacional. Faça uma vez só.</p>
+        <div class="lista-passos ">
+          <div class="passo-img">
+            <figure><img src="img/nfse/a01-login.webp" alt="Abra o Emissor Nacional e clique em “Fazer primeiro acesso”" loading="lazy" data-zoom></figure>
+            <div><span class="num">1</span><h4>Abra o Emissor Nacional e clique em “Fazer primeiro acesso”</h4><p>Na tela de entrada aparecem três formas de acesso: usuário e senha, certificado digital e gov.br. Para criar usuário e senha, clique em <b>Fazer primeiro acesso</b>.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/a02-identificacao.webp" alt="Informe CPF ou CNPJ e a data de nascimento" loading="lazy" data-zoom></figure>
+            <div><span class="num">2</span><h4>Informe CPF ou CNPJ e a data de nascimento</h4><p>Escolha CPF ou CNPJ. Para empresa, informe o CNPJ, o CPF do responsável e a data de nascimento dele. Clique em <b>Avançar</b>.</p><div class="dica">💡 A data de nascimento precisa ser igual à do cadastro do CPF na Receita Federal.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/a03-titulo.webp" alt="Informe o número do título de eleitor" loading="lazy" data-zoom></figure>
+            <div><span class="num">3</span><h4>Informe o número do título de eleitor</h4><p>O sistema pede o título de eleitor do CPF informado.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/a04-recibos-ir.webp" alt="Se declarou Imposto de Renda, informe os recibos" loading="lazy" data-zoom></figure>
+            <div><span class="num">4</span><h4>Se declarou Imposto de Renda, informe os recibos</h4><p>Quem entregou a declaração de IR como pessoa física informa os números dos recibos dos <b>dois últimos anos</b>.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/a05-email-senha.webp" alt="Cadastre o e-mail e crie a senha" loading="lazy" data-zoom></figure>
+            <div><span class="num">5</span><h4>Cadastre o e-mail e crie a senha</h4><p>Informe um e-mail que você acessa e crie a senha seguindo as regras da tela.</p><div class="dica">💡 Preste atenção no e-mail: é para ele que vai o código de confirmação.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/a06-codigo.webp" alt="Digite o código que chegou no e-mail" loading="lazy" data-zoom></figure>
+            <div><span class="num">6</span><h4>Digite o código que chegou no e-mail</h4><p>O sistema envia um código numérico para o e-mail cadastrado. Digite o código e clique em <b>Avançar</b>. Pronto: o acesso está criado.</p><div class="dica">💡 Não chegou? Confira a caixa de spam ou clique em “Reenviar código”.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/a07-erro-usuario.webp" alt="Apareceu “Não foi possível criar seu usuário”?" loading="lazy" data-zoom></figure>
+            <div><span class="num">7</span><h4>Apareceu “Não foi possível criar seu usuário”?</h4><p>Os dados informados não conferem com os da Receita Federal. Nesse caso, entre com <b>certificado digital</b> ou procure a <b>Secretaria de Finanças</b> para o cadastro presencial.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/a08-govbr.webp" alt="MEI: dá para entrar com a conta gov.br" loading="lazy" data-zoom></figure>
+            <div><span class="num">8</span><h4>MEI: dá para entrar com a conta gov.br</h4><p>O MEI pode clicar em <b>Entrar com gov.br</b>, sem criar senha. Precisa ser conta <b>prata ou ouro</b>.</p></div>
+          </div>
+        </div>
+        <div class="base">Imagens e instruções: Guia do Emissor Público Nacional Web v1.2 (Sistema Nacional NFS-e) · Passo a passo: cadastramento e emissão de NFS-e (Sebrae/Receita Federal, fev/2023)</div>
+      </div>
+      <div class="bloco" id="guia-b">
+        <h3>2. Configurar o emissor</h3>
+        <p class="sub">Ajustes que você faz antes da primeira nota.</p>
+        <div class="lista-passos ">
+          <div class="passo-img">
+            <figure><img src="img/nfse/b01-painel.webp" alt="Entre e abra as Configurações" loading="lazy" data-zoom></figure>
+            <div><span class="num">1</span><h4>Entre e abra as Configurações</h4><p>Faça login com CPF/CNPJ e senha. No primeiro acesso, abra as <b>Configurações</b> pelos ícones indicados no painel.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/b02-contato.webp" alt="Preencha e-mail e telefone" loading="lazy" data-zoom></figure>
+            <div><span class="num">2</span><h4>Preencha e-mail e telefone</h4><p>São os contatos usados nas notas que você emitir.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/b03-tributos.webp" alt="Escolha como mostrar o valor aproximado dos tributos" loading="lazy" data-zoom></figure>
+            <div><span class="num">3</span><h4>Escolha como mostrar o valor aproximado dos tributos</h4><p>Marque a opção que se aplica ao seu caso e clique em <b>Salvar</b>.</p><div class="dica">💡 Em dúvida sobre qual opção marcar? Pergunte ao seu contador ou à Secretaria.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/b04-favoritos.webp" alt="Cadastre seus serviços favoritos" loading="lazy" data-zoom></figure>
+            <div><span class="num">4</span><h4>Cadastre seus serviços favoritos</h4><p>Abra <b>Serviços Favoritos</b> e clique em <b>Novo Serviço Favorito</b>. Obrigatório para quem vai usar a emissão simplificada ou o aplicativo.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/b05-codigo-servico.webp" alt="Dê um apelido e escolha o Código de Tributação Nacional" loading="lazy" data-zoom></figure>
+            <div><span class="num">5</span><h4>Dê um apelido e escolha o Código de Tributação Nacional</h4><p>O apelido ajuda você a achar o serviço depois. O <b>Código de Tributação Nacional</b> é a classificação do serviço, igual em todo o Brasil.</p><div class="dica">💡 Confirme o código com o seu contador.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/b06-favorito-salvo.webp" alt="Serviço favorito cadastrado" loading="lazy" data-zoom></figure>
+            <div><span class="num">6</span><h4>Serviço favorito cadastrado</h4><p>Você pode cadastrar vários serviços favoritos.</p></div>
+          </div>
+        </div>
+        <div class="base">Imagens e instruções: Passo a passo: cadastramento e emissão de NFS-e (Sebrae/Receita Federal, fev/2023)</div>
+      </div>
+      <div class="bloco" id="guia-c">
+        <h3>3. Emitir a nota (emissão completa)</h3>
+        <p class="sub">Disponível para todos os prestadores.</p>
+        <div class="lista-passos ">
+          <div class="passo-img">
+            <figure><img src="img/nfse/c01-menu-emissao.webp" alt="Escolha o tipo de emissão" loading="lazy" data-zoom></figure>
+            <div><span class="num">1</span><h4>Escolha o tipo de emissão</h4><p>No menu de emissão, escolha <b>Emissão Completa</b>. A <b>Emissão Simplificada</b> é para o MEI.</p><div class="dica">💡 A emissão completa é obrigatória, por exemplo, na exportação de serviço e quando o ISS é devido no município do cliente.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c02-competencia.webp" alt="Informe a data de competência" loading="lazy" data-zoom></figure>
+            <div><span class="num">2</span><h4>Informe a data de competência</h4><p>É a data em que o serviço foi prestado. Deixe <b>desmarcada</b> a opção “Informar série e número da DPS”.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c03-prestador.webp" alt="Confira os seus dados" loading="lazy" data-zoom></figure>
+            <div><span class="num">3</span><h4>Confira os seus dados</h4><p>Marque que você é o <b>Prestador</b>. Os seus dados vêm preenchidos automaticamente pelo cadastro.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c04-tomador.webp" alt="Informe o cliente (tomador)" loading="lazy" data-zoom></figure>
+            <div><span class="num">4</span><h4>Informe o cliente (tomador)</h4><p>Escolha Brasil ou Exterior e digite o CPF ou CNPJ do cliente. O nome aparece sozinho.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c05-intermediario.webp" alt="Intermediário" loading="lazy" data-zoom></figure>
+            <div><span class="num">5</span><h4>Intermediário</h4><p>Na maioria dos casos, marque <b>“Intermediário não informado”</b> e clique em <b>Avançar</b>.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c06-servico.webp" alt="Informe o serviço prestado" loading="lazy" data-zoom></figure>
+            <div><span class="num">6</span><h4>Informe o serviço prestado</h4><p>Informe o município onde o serviço foi prestado, escolha o Código de Tributação Nacional e escreva a descrição do serviço.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c07-importar-favorito.webp" alt="Atalho: importe um serviço favorito" loading="lazy" data-zoom></figure>
+            <div><span class="num">7</span><h4>Atalho: importe um serviço favorito</h4><p>Se já cadastrou o serviço como favorito, é só importar e os campos são preenchidos.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c08-valores.webp" alt="Informe os valores" loading="lazy" data-zoom></figure>
+            <div><span class="num">8</span><h4>Informe os valores</h4><p>Digite o valor do serviço. Na tributação municipal, a maioria dos prestadores marca o regime especial <b>Nenhum</b>.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c09-perguntas-iss.webp" alt="Responda as perguntas sobre o ISS" loading="lazy" data-zoom></figure>
+            <div><span class="num">9</span><h4>Responda as perguntas sobre o ISS</h4><p>Exigibilidade suspensa? Retenção pelo tomador? Benefício municipal? Na maioria dos casos, a resposta é <b>Não</b>.</p><div class="dica">💡 Na dúvida, confirme com o contador ou com a Secretaria.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c10-complementares.webp" alt="Informações complementares e avançar" loading="lazy" data-zoom></figure>
+            <div><span class="num">10</span><h4>Informações complementares e avançar</h4><p>Se precisar, escreva informações complementares. Clique em <b>Avançar</b> para conferir o resumo.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c11-nota-gerada.webp" alt="Confira e emita" loading="lazy" data-zoom></figure>
+            <div><span class="num">11</span><h4>Confira e emita</h4><p>Revise o resumo. Dá para voltar e editar Pessoas, Serviço ou Valores. Clique em <b>Emitir NFS-e</b>. Depois, baixe o PDF (DANFSe) e o XML para enviar ao cliente.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/c12-simplificada.webp" alt="MEI: emissão simplificada" loading="lazy" data-zoom></figure>
+            <div><span class="num">12</span><h4>MEI: emissão simplificada</h4><p>Na emissão simplificada, você escolhe um serviço favorito, informa o cliente e o valor, e emite.</p></div>
+          </div>
+        </div>
+        <div class="base">Imagens e instruções: Passo a passo: cadastramento e emissão de NFS-e (Sebrae/Receita Federal, fev/2023) · Guia do Emissor Público Nacional Web v1.2 (Sistema Nacional NFS-e)</div>
+      </div>
+      <div class="bloco" id="guia-d">
+        <h3>4. Emitir pelo celular (aplicativo NFS-e Mobile)</h3>
+        <p class="sub">Para o MEI. O cadastro no site e os serviços favoritos vêm antes.</p>
+        <div class="lista-passos grade-celular">
+          <div class="passo-img celular">
+            <figure><img src="img/nfse/d01-app-login.webp" alt="Baixe o app e entre" loading="lazy" data-zoom></figure>
+            <div><span class="num">1</span><h4>Baixe o app e entre</h4><p>Baixe o <b>NFS-e Mobile</b> na App Store ou no Google Play e entre com o mesmo login e senha do site.</p></div>
+          </div>
+          <div class="passo-img celular">
+            <figure><img src="img/nfse/d02-app-menu.webp" alt="Toque em “Emitir NFS-e”" loading="lazy" data-zoom></figure>
+            <div><span class="num">2</span><h4>Toque em “Emitir NFS-e”</h4></div>
+          </div>
+          <div class="passo-img celular">
+            <figure><img src="img/nfse/d03-app-form.webp" alt="Escolha o serviço" loading="lazy" data-zoom></figure>
+            <div><span class="num">3</span><h4>Escolha o serviço</h4><p>O CPF/CNPJ do cliente é opcional. Aparecem os serviços cadastrados como favoritos no site.</p></div>
+          </div>
+          <div class="passo-img celular">
+            <figure><img src="img/nfse/d04-app-preenchido.webp" alt="Informe o valor e emita" loading="lazy" data-zoom></figure>
+            <div><span class="num">4</span><h4>Informe o valor e emita</h4><p>Digite o valor do serviço e toque em <b>Emitir NFS-e</b>.</p></div>
+          </div>
+          <div class="passo-img celular">
+            <figure><img src="img/nfse/d05-app-sucesso.webp" alt="Nota emitida" loading="lazy" data-zoom></figure>
+            <div><span class="num">5</span><h4>Nota emitida</h4><p>Pronto: a nota foi emitida com sucesso.</p></div>
+          </div>
+          <div class="passo-img celular">
+            <figure><img src="img/nfse/d06-app-obra.webp" alt="Serviço de obra?" loading="lazy" data-zoom></figure>
+            <div><span class="num">6</span><h4>Serviço de obra?</h4><p>Em <b>Informações adicionais</b>, informe o endereço da obra ou o número do <b>CNO</b> e o município.</p></div>
+          </div>
+        </div>
+        <div class="base">Imagens e instruções: Passo a passo: cadastramento e emissão de NFS-e (Sebrae/Receita Federal, fev/2023)</div>
+      </div>
+      <div class="bloco" id="guia-e">
+        <h3>5. Depois de emitir</h3>
+        <p class="sub">Consultar, corrigir, cancelar e conferir notas recebidas.</p>
+        <div class="lista-passos ">
+          <div class="passo-img">
+            <figure><img src="img/nfse/e01-emitidas.webp" alt="NFS-e emitidas" loading="lazy" data-zoom></figure>
+            <div><span class="num">1</span><h4>NFS-e emitidas</h4><p>Em <b>NFS-e emitidas</b>, cada nota tem um menu com Visualizar, Substituir, Cancelar, Download XML e Download DANFSe.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/e02-visualizar.webp" alt="Visualizar a nota" loading="lazy" data-zoom></figure>
+            <div><span class="num">2</span><h4>Visualizar a nota</h4><p>Mostra todos os dados da nota e os eventos ligados a ela, como cancelamento ou substituição.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/e03-analise-fiscal.webp" alt="Cancelamento fora do prazo" loading="lazy" data-zoom></figure>
+            <div><span class="num">3</span><h4>Cancelamento fora do prazo</h4><p>Se o cancelamento não for mais permitido, o sistema oferece a <b>Solicitação de Análise Fiscal</b>: informe o motivo e a justificativa. O pedido vai para a Prefeitura analisar.</p><div class="dica">💡 Valor ou dado errado? Prefira <b>Substituir</b>: o emissor gera a nota correta e cancela a anterior.</div></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/e04-recebidas.webp" alt="NFS-e recebidas" loading="lazy" data-zoom></figure>
+            <div><span class="num">4</span><h4>NFS-e recebidas</h4><p>Aqui aparecem as notas em que você é o cliente (tomador) ou intermediário.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/e05-confirmar.webp" alt="Confirmar uma nota recebida" loading="lazy" data-zoom></figure>
+            <div><span class="num">5</span><h4>Confirmar uma nota recebida</h4><p>Se você reconhece o serviço e concorda com os dados, clique em <b>Confirmar NFS-e</b>.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/e06-rejeitar.webp" alt="Rejeitar uma nota recebida" loading="lazy" data-zoom></figure>
+            <div><span class="num">6</span><h4>Rejeitar uma nota recebida</h4><p>Se não reconhece a nota ou discorda dos dados, informe o motivo e clique em <b>Rejeitar NFS-e</b>.</p></div>
+          </div>
+          <div class="passo-img">
+            <figure><img src="img/nfse/e07-consulta-publica.webp" alt="Consulta pública" loading="lazy" data-zoom></figure>
+            <div><span class="num">7</span><h4>Consulta pública</h4><p>Qualquer pessoa pode conferir uma NFS-e pela <b>chave de acesso</b> ou pelos dados da DPS, no portal nacional.</p></div>
+          </div>
+        </div>
+        <div class="base">Imagens e instruções: Guia do Emissor Público Nacional Web v1.2 (Sistema Nacional NFS-e)</div>
+      </div>
+    </section>
+
+    <!-- ===== NFS-e: depois de emitir ===== -->
+    <section class="tela" id="nfse-depois">
+      <div class="banner nfse">
+        <div style="position:relative;z-index:1"><span class="selo-nfse">NFS-e NACIONAL</span><h1>Depois de emitir: corrigir, cancelar e conferir</h1><p>Onde encontrar suas notas, o que fazer quando errou e como conferir as notas que você recebe.</p></div>
+      </div>
+      <div class="trilha">NFS-e Nacional › <b>Depois de emitir</b></div>
+
+      <div class="bloco">
+        <h3>Errei na nota. E agora?</h3>
+        <p class="sub">Em “NFS-e emitidas”, cada nota tem as opções Visualizar, Substituir, Cancelar, Baixar XML e Baixar DANFSe.</p>
+        <div class="decisao">
+          <div><h4>🔁 Substituir</h4><p>Quando o serviço aconteceu, mas algum dado está errado (valor, descrição, cliente…).</p>
+            <ul><li>Gera uma nota nova com os dados corrigidos</li><li>A nota original é cancelada automaticamente</li><li>As duas ficam ligadas, e o emissor mostra o comparativo</li></ul></div>
+          <div><h4>✖ Cancelar</h4><p>Quando o serviço não aconteceu ou a nota não devia existir.</p>
+            <ul><li>Informe o motivo e a justificativa</li><li>Fora do prazo, o cancelamento vira <b>pedido de análise fiscal</b> e vai para a Prefeitura decidir</li></ul></div>
+        </div>
+        <div class="campo-guia" style="margin-top:12px"><div class="nome">Prazos em Canindé</div>
+          <div><p>Cada município define se há prazo máximo para substituir e cancelar e quantos dias são.</p>
+            <div class="local"><b>A definir pela Secretaria:</b> prazo para substituição ___ dias · prazo para cancelamento ___ dias · quem analisa os pedidos fora do prazo.</div></div></div>
+      </div>
+
+      <div class="bloco">
+        <h3>Notas que você recebe</h3>
+        <p class="sub">Em “NFS-e recebidas” aparecem as notas em que você é o cliente (tomador) ou intermediário.</p>
+        <div class="decisao">
+          <div><h4>✔ Confirmar</h4><p>Você reconhece o serviço e concorda com os dados da nota.</p></div>
+          <div><h4>⚠ Rejeitar</h4><p>Você não reconhece a nota ou discorda dos dados. Informe o motivo.</p></div>
+        </div>
+        <p class="sub" style="margin:10px 0 0">As duas ações exigem assinatura e ficam registradas na nota.</p>
+      </div>
+
+      <div class="bloco">
+        <h3>Conferir se uma nota é verdadeira</h3>
+        <p class="sub">Qualquer pessoa pode consultar uma NFS-e na <b>Consulta Pública</b> do portal nacional, usando a chave de acesso ou os dados da DPS.</p>
+        <div class="busca-grande" style="margin:0"><input placeholder="Chave de acesso da NFS-e (50 dígitos)"><button class="botao peq preto">Consultar no portal nacional ↗</button></div>
+      </div>
+      <div class="base">Fonte: Guia do Emissor Público Nacional Web v1.2, itens 5, 6 e 9</div>
+    </section>
+
+    <!-- ===== NFS-e: problemas comuns ===== -->
+    <section class="tela" id="nfse-problemas">
+      <div class="banner nfse">
+        <div style="position:relative;z-index:1"><span class="selo-nfse">NFS-e NACIONAL</span><h1>Problemas comuns e como resolver</h1><p>As mensagens de erro que mais aparecem e o que fazer em cada caso.</p></div>
+      </div>
+      <div class="trilha">NFS-e Nacional › <b>Problemas comuns</b></div>
+      <div class="duas">
+        <div id="faq-nfse">
+          <details class="faq" open><summary>“A data de nascimento informada não corresponde ao CPF informado.”<span class="tag lar">Primeiro acesso</span></summary>
+            <div class="resp">A data digitada é diferente da que está no cadastro do CPF na Receita Federal. Confira a data. Se estiver certa, atualize o CPF no site da Receita ou agende o cadastro presencial na Secretaria.</div></details>
+          <details class="faq"><summary>“Não foi possível recuperar informações do Contribuinte.”<span class="tag lar">Primeiro acesso</span></summary>
+            <div class="resp">O CPF ou CNPJ não foi encontrado. Confira os números digitados. Se o CNPJ for novo, aguarde a atualização dos cadastros ou procure a Secretaria.</div></details>
+          <details class="faq"><summary>“Não foi possível criar seu usuário.”<span class="tag lar">Primeiro acesso</span></summary>
+            <div class="resp">Os dados de título de eleitor ou dos recibos do IR não conferem. Use o certificado digital ou faça o cadastro presencial na Secretaria de Finanças.</div></details>
+          <details class="faq"><summary>Não aparece a opção “Emissão Simplificada”.<span class="tag lar">Emissão</span></summary>
+            <div class="resp">A emissão simplificada está disponível para MEI. Os demais usam a Emissão Completa.</div></details>
+          <details class="faq"><summary>O aplicativo não mostra o meu serviço.<span class="tag lar">Aplicativo</span></summary>
+            <div class="resp">O aplicativo só mostra os <b>serviços favoritos</b>. Cadastre-os primeiro no Emissor Web, em “Serviços Favoritos”.</div></details>
+          <details class="faq"><summary>Meu cadastro aparece como bloqueado.<span class="tag lar">Cadastro</span></summary>
+            <div class="resp">O sistema deixa entrar, mas não deixa emitir enquanto o cadastro estiver bloqueado. A regularização é feita pela Secretaria de Finanças.</div></details>
+          <details class="faq"><summary>Preciso informar série e número da DPS?<span class="tag lar">Emissão</span></summary>
+            <div class="resp">Não. Deixe a opção desmarcada que o emissor numera sozinho.</div></details>
+          <details class="faq"><summary>Emiti com valor errado.<span class="tag lar">Correção</span></summary>
+            <div class="resp">Use <b>Substituir</b>: o emissor gera a nota correta e cancela a anterior. <a data-ir="nfse-depois" style="color:var(--laranja);font-weight:600;cursor:pointer">Veja como</a></div></details>
+        </div>
+        <div class="form-card">
+          <div class="cabeca">Pergunte sobre NFS-e</div>
+          <div class="corpo">
+            <div class="campo"><label>E-mail</label><input placeholder="voce@exemplo.com"></div>
+            <div class="campo"><label>Em que etapa você está?</label><select><option>Primeiro acesso / senha</option><option>Configuração e favoritos</option><option>Preenchimento da nota</option><option>Código do serviço</option><option>Cancelar ou substituir</option><option>Aplicativo</option></select></div>
+            <div class="campo"><label>Sua dúvida</label><textarea placeholder="Se apareceu uma mensagem de erro, copie aqui"></textarea></div>
+            <div class="campo"><label>Print da tela (opcional)</label><input type="file"></div>
+            <button class="botao" style="width:100%">Enviar</button>
+            <p class="sub" style="margin:12px 0 0">Em Canindé: <a href="mailto:setortributoscaninde@gmail.com" style="color:var(--laranja);font-weight:600">setortributoscaninde@gmail.com</a> · <a href="tel:+5585981934279" style="color:var(--laranja);font-weight:600">(85) 9 8193-4279</a><br>Atendimento nacional: <b>atendimento.nfs-e@rfb.gov.br</b> · Sebrae: <b>0800 570 0800</b></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== NFS-e: materiais ===== -->
+    <section class="tela" id="nfse-materiais">
+      <div class="banner nfse">
+        <div style="position:relative;z-index:1"><span class="selo-nfse">NFS-e NACIONAL</span><h1>Materiais, links e oficinas</h1><p>Guias oficiais para baixar, endereços do sistema nacional e agenda de atendimento em Canindé.</p></div>
+      </div>
+      <div class="trilha">NFS-e Nacional › <b>Materiais e oficinas</b></div>
+      <div class="duas meio">
+        <div>
+          <div class="videos" style="grid-template-columns:1fr">
+            <a class="video" href="materiais/guia-oficial-emissor-nacional-web-v1.2.pdf" target="_blank"><div class="info"><h4>📘 Guia do Emissor Público Nacional Web — v1.2</h4><div class="meta"><span class="tag oficial">Oficial</span>Sistema Nacional NFS-e · 104 páginas · set/2025</div></div></a>
+            <a class="video" href="materiais/ebook-sebrae-rfb-cadastro-emissao-nfse.pdf" target="_blank"><div class="info"><h4>📗 Passo a passo: cadastramento e emissão de NFS-e (Web e Mobile)</h4><div class="meta"><span class="tag oficial">Sebrae / Receita</span>e-book · 23 páginas · fev/2023 · foco no MEI</div></div></a>
+            <div class="video-card"><div class="yt" data-yt="jCf0QQ4n7xc" style="background-image:url(https://i.ytimg.com/vi/jCf0QQ4n7xc/hqdefault.jpg)"><span class="ord">1</span><span class="play">▶</span></div><div class="info"><h4>Cadastro no Portal Nacional de Emissão de NFS-e</h4><div class="meta"><span class="tag oficial">Sebrae</span>vídeo</div></div></div>
+            <div class="video-card"><div class="yt" data-yt="Oxf-l9-Mh1o" style="background-image:url(https://i.ytimg.com/vi/Oxf-l9-Mh1o/hqdefault.jpg)"><span class="ord">2</span><span class="play">▶</span></div><div class="info"><h4>Emissão de NFS-e pelo Emissor Web</h4><div class="meta"><span class="tag oficial">Sebrae</span>vídeo</div></div></div>
+            <div class="video-card"><div class="yt" data-yt="Z152-eXvOMA" style="background-image:url(https://i.ytimg.com/vi/Z152-eXvOMA/hqdefault.jpg)"><span class="ord">3</span><span class="play">▶</span></div><div class="info"><h4>Emissão de NFS-e pelo app NFS-e Mobile</h4><div class="meta"><span class="tag oficial">Sebrae</span>vídeo</div></div></div>
+            <div class="video"><div class="info"><h4>📋 Tabela “atividade → código nacional” de Canindé</h4><div class="meta"><span class="tag parado">a preparar</span>Secretaria de Finanças</div></div></div>
+          </div>
+          <div class="caixa-lateral" style="margin-top:14px">
+            <h4>Endereços oficiais</h4>
+            <ul>
+              <li>Emissor Web: <a href="https://www.nfse.gov.br/EmissorNacional/Login?ReturnUrl=%2femissornacional" target="_blank" rel="noopener" style="color:var(--laranja);font-weight:700">nfse.gov.br/EmissorNacional ↗</a></li>
+              <li>Consulta pública de notas: portal nfse.gov.br</li>
+              <li>Aplicativo: <b>NFS-e Mobile</b> (App Store e Google Play)</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="caixa-lateral">
+            <h4>Oficinas e plantões em Canindé</h4>
+            <div class="turmas">
+              <div class="turma"><div class="dt"><b>14</b><small>OUT</small></div><div class="txt">Primeiro acesso e configuração<small>Auditório · 9h · MEI · 40 vagas</small></div><button class="botao peq">Inscrever</button></div>
+              <div class="turma"><div class="dt"><b>21</b><small>OUT</small></div><div class="txt">Emissão completa na prática<small>Laboratório · 14h · empresas · 20 vagas</small></div><button class="botao peq">Inscrever</button></div>
+              <div class="turma"><div class="dt"><b>28</b><small>OUT</small></div><div class="txt">Encontro com contadores<small>Auditório · 9h · códigos de serviço e retenções</small></div><button class="botao peq">Inscrever</button></div>
+              <div class="turma"><div class="dt"><b>SEG</b><small>a SEX</small></div><div class="txt">Plantão de cadastro presencial<small>Diretoria de Arrecadação · Rua Valdery Uchoa, 597 · seg. a qui., 7h30 às 17h · sex., 7h30 às 13h30</small></div><button class="botao peq preto" data-ir="nfse-acesso">Agendar</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pergunta-aberta"><b>Não publicado:</b> o “Guia prático de emissão de NFS-e pelo Emissor Nacional” (Group Legacy) é material de uma empresa privada e usa exemplos de Curitiba (ISS de 5% e percentuais de retenção genéricos). Aproveitei as explicações, mas não o publiquei para não confundir o contribuinte de Canindé.</div>
+    </section>
+
+    <!-- ===== ADM: migração NFS-e ===== -->
+    <section class="tela" id="adm-nfse">
+      <div class="banner escuro">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>
+        <div style="position:relative;z-index:1"><h1>Migração para a NFS-e Nacional</h1><p>Acompanhe quais prestadores de Canindé já estão prontos para emitir, chame quem está atrasado e organize os atendimentos presenciais.</p></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>Prestadores de serviço ativos</span><b>1.284</b></div>
+        <div class="kpi"><span>Já fizeram o primeiro acesso</span><b>412</b></div>
+        <div class="kpi"><span>Já emitiram nota no Emissor Nacional</span><b>296</b></div>
+        <div class="kpi"><span>Cadastros presenciais agendados</span><b>37</b></div>
+      </div>
+      <div class="duas larga">
+        <div class="painel">
+          <h3>Prestadores <span class="tag espera">dados de exemplo</span></h3>
+          <div class="filtros" style="margin-bottom:10px">
+            <button class="chip ativo">Sem acesso (872)</button><button class="chip">Acessou, não emitiu (116)</button><button class="chip">Emitindo (296)</button><button class="chip">Bloqueados (9)</button>
+          </div>
+          <table class="lista">
+            <thead><tr><th>Contribuinte</th><th>Perfil</th><th>Situação</th><th>Contador</th></tr></thead>
+            <tbody>
+              <tr><td>Oficina Silva ME</td><td>Simples</td><td><span class="tag erro">Sem acesso</span></td><td>Escritório A</td></tr>
+              <tr><td>Maria J. (cabeleireira)</td><td>MEI</td><td><span class="tag erro">Sem acesso</span></td><td>—</td></tr>
+              <tr><td>Clínica Boa Saúde Ltda</td><td>Presumido</td><td><span class="tag espera">Acessou, não emitiu</span></td><td>Escritório B</td></tr>
+              <tr><td>João P. (eletricista)</td><td>MEI</td><td><span class="tag ok">Emitindo</span></td><td>—</td></tr>
+              <tr><td>Construtora Sertão Ltda</td><td>Real</td><td><span class="tag parado">Bloqueado</span></td><td>Escritório A</td></tr>
+            </tbody>
+          </table>
+          <div class="acoes" style="margin-top:12px">
+            <button class="botao peq">Enviar lembrete aos selecionados</button>
+            <button class="botao vazio peq">Avisar o contador responsável</button>
+            <button class="botao vazio peq">Importar planilha</button>
+          </div>
+        </div>
+        <div>
+          <div class="painel">
+            <h3>Funil de preparação</h3>
+            <div class="barra-funil">
+              <div><span>Prestadores ativos</span><span class="trilho"><i style="width:100%"></i></span><b>1.284</b></div>
+              <div><span>Fizeram o primeiro acesso</span><span class="trilho"><i style="width:32%"></i></span><b>412</b></div>
+              <div><span>Emitiram ao menos uma nota</span><span class="trilho"><i style="width:23%"></i></span><b>296</b></div>
+            </div>
+          </div>
+          <div class="painel">
+            <h3>Atendimentos presenciais de hoje</h3>
+            <table class="lista">
+              <tbody>
+                <tr><td>08:30</td><td>Antônia R. · MEI · não fez o primeiro acesso</td></tr>
+                <tr><td>09:00</td><td>Construtora Sertão · cadastro bloqueado</td></tr>
+                <tr><td>10:15</td><td>Francisco L. · data de nascimento não confere</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="pergunta-aberta"><b>A confirmar:</b> a lista de prestadores sairia do cadastro mobiliário de Canindé, e a situação no Emissor Nacional do <b>Painel Administrativo Municipal</b> da NFS-e. Precisamos ver se esse painel exporta planilha ou se a atualização será manual.</div>
+    </section>
+
+    <!-- ================= ADM: DÚVIDAS DO EVENTO ================= -->
+    <section class="tela" id="adm-evento">
+      <div class="banner escuro">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div style="position:relative;z-index:1"><h1>Dúvidas do Conexão Empresarial</h1><p>Perguntas deixadas na inscrição do evento de 19/09/2026. Classifique por tema, aprove a resposta do tema e envie a resposta a cada participante por e-mail.</p></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>Inscrições importadas</span><b>114</b></div>
+        <div class="kpi"><span>Com pergunta</span><b>24</b></div>
+        <div class="kpi"><span>Temas com resposta em rascunho</span><b>6</b></div>
+        <div class="kpi"><span>Respostas enviadas</span><b id="ev-enviadas">0</b></div>
+      </div>
+      <div class="painel">
+        <h3>Perguntas por participante <span class="tag espera">respostas aguardando aprovação</span></h3>
+        <div class="filtros" id="filtro-adm-evento"></div>
+        <table class="lista">
+          <thead><tr><th>Participante</th><th>Segmento</th><th>Pergunta</th><th>Tema</th><th>Situação</th></tr></thead>
+          <tbody id="adm-evento-lista"></tbody>
+        </table>
+        <div class="acoes" style="margin-top:12px">
+          <button class="botao peq" id="ev-aprovar">Aprovar respostas e publicar na página do evento</button>
+          <button class="botao vazio peq" id="ev-enviar">Enviar resposta por e-mail a cada participante</button>
+          <button class="botao vazio peq">Convidar os 90 inscritos sem pergunta para enviar dúvidas</button>
+        </div>
+      </div>
+      <div class="pergunta-aberta"><b>Origem dos dados:</b> planilha de inscrições do evento (Anexo 16). Só os <b>24</b> inscritos que escreveram pergunta entram aqui. No portal público aparecem só a pergunta e o segmento, nunca o nome. Telefone e e-mail ficam guardados apenas para enviar a resposta. Todos os inscritos marcaram o consentimento no formulário. <b>A confirmar:</b> se esse consentimento cobre o envio de resposta por e-mail.</div>
+    </section>
+
+    <!-- ================= ADM: MONITOR CGIBS ================= -->
+    <section class="tela" id="adm-monitor">
+      <div class="banner escuro">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        <div style="position:relative;z-index:1"><h1>Monitor do Comitê Gestor</h1><p>Tudo o que sai em cgibs.gov.br chega aqui automaticamente. A equipe decide o público, marca prazos e escreve o que muda para Canindé.</p></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>Novas para ler</span><b>3</b></div>
+        <div class="kpi"><span>Publicadas no mês</span><b>14</b></div>
+        <div class="kpi"><span>Com prazo ativo</span><b>4</b></div>
+        <div class="kpi"><span>Última verificação</span><b>06:00</b></div>
+      </div>
+      <div class="duas larga">
+        <div class="painel">
+          <h3>Capturadas do CGIBS <span class="sinc">verificando a cada 2 horas</span></h3>
+          <table class="lista clicavel">
+            <thead><tr><th>Data</th><th>Título no CGIBS</th><th>Situação</th></tr></thead>
+            <tbody id="monitor-fila"></tbody>
+          </table>
+        </div>
+        <div class="painel">
+          <h3 id="m-titulo">Curadoria</h3>
+          <div class="pergunta-orig">
+            <div class="quem" id="m-meta"></div>
+            <div id="m-texto" style="font-weight:600"></div>
+            <div id="m-resumo" style="font-size:13px;color:var(--tinta-fraca);margin-top:4px"></div>
+          </div>
+          <div class="campo"><label>Público</label><select><option>MEI / Simples</option><option>Todos</option><option>Empresas</option><option>Contadores</option><option>Prestador de serviço</option></select></div>
+          <label class="check"><input type="checkbox" checked> Tem prazo: mostrar no quadro “Prazos que estão correndo”</label>
+          <div class="campo"><label>O que isso significa para Canindé (opcional)</label><textarea>Se a sua empresa vende principalmente para outras empresas, converse com seu contador antes de 30/10: o regime regular pode tornar seu preço mais competitivo.</textarea></div>
+          <label class="check"><input type="checkbox" checked> Avisar inscritos por e-mail/WhatsApp</label>
+          <div class="acoes">
+            <button class="botao peq">Publicar no portal</button>
+            <button class="botao vazio peq">Publicar só o título e o link</button>
+            <button class="botao vazio peq">Ignorar</button>
+          </div>
+        </div>
+      </div>
+      <div class="painel">
+        <h3>Configuração da captura</h3>
+        <div class="linha-conf"><span>Notícias<small>cgibs.gov.br/noticias</small></span><button class="chave on"></button></div>
+        <div class="linha-conf"><span>Comunicados oficiais<small>cgibs.gov.br/comunicados-oficiais</small></span><button class="chave on"></button></div>
+        <div class="linha-conf"><span>Legislações (leis, resoluções, regulamentos, portarias)<small>cgibs.gov.br/legislacoes</small></span><button class="chave on"></button></div>
+        <div class="linha-conf"><span>Vídeos, guias e cartilhas<small>cgibs.gov.br/central-de-conteudo</small></span><button class="chave on"></button></div>
+        <div class="linha-conf"><span>Publicar automaticamente o título e o link, sem esperar a equipe<small>A explicação local pode ser acrescentada depois</small></span><button class="chave on"></button></div>
+      </div>
+      <div class="pergunta-aberta"><b>A decidir:</b> notícia nova do CGIBS aparece no portal na hora (só título + link, como está ligado acima) ou só depois que alguém da equipe ler?</div>
+    </section>
+
+    <!-- ================= ADM: CAIXA DE DÚVIDAS ================= -->
+    <section class="tela" id="adm-duvidas">
+      <div class="banner escuro">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        <div style="position:relative;z-index:1"><h1>Caixa de dúvidas</h1><p>Responda por e-mail e, se for útil para outros, publique como pergunta frequente com a base oficial.</p></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>Novas</span><b>12</b></div>
+        <div class="kpi"><span>Em resposta</span><b>5</b></div>
+        <div class="kpi"><span>Respondidas no mês</span><b>48</b></div>
+        <div class="kpi"><span>Tempo médio de resposta</span><b>2,3 dias</b></div>
+      </div>
+      <div class="duas larga">
+        <div class="painel">
+          <h3>Fila <span class="tag espera">5 dias úteis de prazo</span></h3>
+          <table class="lista clicavel">
+            <thead><tr><th>Protocolo</th><th>Dúvida</th><th>Perfil</th><th>Situação</th></tr></thead>
+            <tbody id="fila">
+              <tr class="sel" data-q="0"><td>DUV-00143</td><td>Já sou do Simples. Preciso fazer opção de novo para continuar em 2027?</td><td>Empresa</td><td><span class="tag erro">Nova · 4º dia</span></td></tr>
+              <tr data-q="1"><td>DUV-00142</td><td>Como fica o ISS de obra feita em Canindé por empresa de fora?</td><td>Contador</td><td><span class="tag erro">Nova</span></td></tr>
+              <tr data-q="2"><td>DUV-00140</td><td>Sou MEI, preciso destacar CBS na nota?</td><td>MEI</td><td><span class="tag espera">Com Ana</span></td></tr>
+              <tr data-q="3"><td>DUV-00137</td><td>Quando o IPTU vai mudar?</td><td>Cidadão</td><td><span class="tag ok">Respondida</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="painel">
+          <h3 id="q-titulo">DUV-00143 <span class="tag erro">Nova</span></h3>
+          <div class="pergunta-orig">
+            <div class="quem" id="q-quem"></div>
+            <div id="q-texto"></div>
+          </div>
+          <div class="campo"><label>Responsável</label><select><option>Ana (Tributação)</option><option>Carlos (Fiscalização)</option><option>Eu</option></select></div>
+          <div class="campo"><label>Resposta</label><textarea placeholder="Escreva a resposta que vai por e-mail"></textarea></div>
+          <div class="campo"><label>Base oficial (obrigatório para publicar no FAQ)</label>
+            <select><option>Notícia CGIBS 14/09/2026 — Prazo para opção pelo Simples Nacional…</option><option>Resolução CGSN 194</option><option>LC 214/2025</option><option>Outra (informar link)</option></select></div>
+          <label class="check"><input type="checkbox" checked> Publicar também nas perguntas frequentes (sem identificar o autor)</label>
+          <div class="acoes">
+            <button class="botao peq">Responder por e-mail</button>
+            <button class="botao vazio peq">Salvar rascunho</button>
+            <button class="botao vazio peq">Encaminhar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ADM: PUBLICAR ================= -->
+    <section class="tela" id="adm-publicar">
+      <div class="banner escuro">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        <div style="position:relative;z-index:1"><h1>Publicar conteúdo</h1><p>Guias, dicas, vídeos, palestras e perguntas frequentes da Secretaria. Todo conteúdo informa a base oficial.</p></div>
+      </div>
+      <div class="duas meio">
+        <div class="painel">
+          <h3>Novo conteúdo</h3>
+          <div class="filtros">
+            <button class="chip ativo">Guia / dica</button><button class="chip">Notícia local</button><button class="chip">Vídeo</button>
+            <button class="chip">Palestra / material</button><button class="chip">Pergunta frequente</button>
+          </div>
+          <div class="campo"><label>Título</label><input value="Simples “puro” ou “híbrido”: a decisão de 2027"></div>
+          <div class="campo"><label>Público</label><select><option>MEI / Simples</option><option>Todos</option><option>Empresas</option><option>Contadores</option><option>Cidadão</option></select></div>
+          <div class="campo"><label>Texto</label><textarea style="min-height:120px">O Simples Nacional continua existindo...</textarea></div>
+          <div class="campo"><label>Base oficial</label><input value="Resolução CGSN 194 · notícia CGIBS de 30/09/2026"></div>
+          <div class="campo"><label>Vídeo (link do YouTube) ou anexo PDF/PPTX</label><input placeholder="https://youtube.com/… ou arraste um arquivo"></div>
+          <label class="check"><input type="checkbox" checked> Destacar na página inicial</label>
+          <div class="acoes"><button class="botao peq">Enviar para aprovação</button><button class="botao vazio peq" data-ir="artigo">Pré-visualizar</button></div>
+        </div>
+        <div class="painel">
+          <h3>Publicações da Secretaria</h3>
+          <table class="lista">
+            <thead><tr><th>Título</th><th>Tipo</th><th>Situação</th></tr></thead>
+            <tbody>
+              <tr><td>Simples “puro” ou “híbrido”</td><td>Guia</td><td><span class="tag ok">Publicada · 2.310 visitas</span></td></tr>
+              <tr><td>Palestra MEI e Simples Nacional</td><td>Palestra</td><td><span class="tag espera">Aguardando aprovação</span></td></tr>
+              <tr><td>NFS-e padrão nacional</td><td>Guia</td><td><span class="tag ok">Publicada · 1.240 visitas</span></td></tr>
+              <tr><td>Checklist para decidir o regime</td><td>Material</td><td><span class="tag ok">Publicada</span></td></tr>
+              <tr><td>Oficinas para contadores — novembro</td><td>Notícia local</td><td><span class="tag parado">Agendada p/ 15/10</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ADM: MÓDULOS ================= -->
+    <section class="tela" id="adm-modulos">
+      <div class="banner escuro">
+        <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <div style="position:relative;z-index:1"><h1>Módulos do portal</h1><p>Cada serviço da Secretaria é um módulo. Ligar coloca no menu e na página inicial; desligar tira do ar sem apagar nada.</p></div>
+      </div>
+      <div class="modulos">
+        <div class="modulo"><div class="cab"><h4>Reforma Tributária</h4><button class="chave on"></button></div>
+          <p>Guias, cronograma, perguntas frequentes, vídeos e materiais.</p><span class="pub"><span class="tag ok">Ativo</span> · público</span></div>
+        <div class="modulo"><div class="cab"><h4>Monitor de fontes oficiais</h4><button class="chave on"></button></div>
+          <p>Captura automática do CGIBS. Depois pode incluir Receita Federal e Sefaz-CE.</p><span class="pub"><span class="tag ok">Ativo</span> · equipe + público</span></div>
+        <div class="modulo"><div class="cab"><h4>Fale com a Secretaria</h4><button class="chave on"></button></div>
+          <p>Envio de dúvidas com protocolo e caixa de atendimento da equipe.</p><span class="pub"><span class="tag ok">Ativo</span> · público + equipe</span></div>
+        <div class="modulo"><div class="cab"><h4>Serviços online (atalhos)</h4><button class="chave on"></button></div>
+          <p>2ª via do IPTU, ISS Eletrônico e certidão da empresa. Hoje são links para o sistema tributário do município (SpeedGov), com orientações e avisos do portal.</p><span class="pub"><span class="tag ok">Ativo</span> · público</span></div>
+        <div class="modulo"><div class="cab"><h4>NFS-e Nacional</h4><button class="chave on"></button></div>
+          <p>Ambiente de preparação para o Emissor Nacional e painel de migração dos prestadores.</p><span class="pub"><span class="tag ok">Ativo</span> · público + equipe</span></div>
+        <div class="modulo"><div class="cab"><h4>Dívida ativa e parcelamento</h4><button class="chave"></button></div>
+          <p>Consulta de débitos inscritos e pedido de parcelamento.</p><span class="pub"><span class="tag parado">Planejado</span> · público</span></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="zoom" id="zoom" aria-hidden="true"><img alt=""><span class="fechar">✕ fechar</span><p></p></div>
+
+<footer class="rodape-site">
+  <div class="colunas">
+    <img src="img/logo-prefeitura.webp" alt="Prefeitura Municipal de Canindé — O trabalho que transforma">
+    <div>
+      <h5>Atendimento presencial</h5>
+      <p><b>Diretoria de Arrecadação</b> · atendimento seg. a qui., 7h30 às 17h · sex., 7h30 às 13h30<br>Rua Valdery Uchoa, 597 (esquina com a Rua Gervásio Martins, 134) · Centro · Canindé-CE · 62700-000<br><a href="https://www.google.com/maps/search/?api=1&query=Rua+Valdery+Uchoa%2C+597%2C+Centro%2C+Caninde+CE" target="_blank" rel="noopener">Ver no mapa ↗</a></p>
+    </div>
+    <div>
+      <h5>Atendimento digital</h5>
+      <p>E-mail: <a href="mailto:setortributoscaninde@gmail.com">setortributoscaninde@gmail.com</a><br>Telefone: <a href="tel:+5585981934279">(85) 9 8193-4279</a><br>Portal de Serviços: <a href="https://servicos2.speedgov.com.br/caninde" target="_blank" rel="noopener">servicos2.speedgov.com.br/caninde ↗</a></p>
+      <p style="font-size:12px">Fontes oficiais da reforma: cgibs.gov.br · gov.br/receitafederal</p>
+    </div>
+  </div>
+  <div class="faixa-rodape" aria-hidden="true"></div>
+</footer>
+
+<script>
+  /* ---------- dados ---------- */
+  // Notícias reais do cgibs.gov.br (capturadas em 02/10/2026). "local" = explicação escrita pela Secretaria.
+  const NOTICIAS = [
+    {data:'30/09/2026', tipo:'noticia', prazo:true, nova:true,
+     titulo:'Opção do contribuinte por Simples Nacional ou pelo regime regular de CBS e IBS para 2027 tem novos prazos',
+     resumo:'Empresas do Simples Nacional poderão optar por apurar e recolher o IBS e a CBS pelo regime regular, em vez de recolher esses tributos dentro do DAS. Veja datas e outros detalhes.',
+     local:'Os prazos foram prorrogados. Entrar no Simples: até 15/10. Escolher IBS/CBS fora do DAS: até 30/10. Veja o guia completo.',
+     link:'https://www.cgibs.gov.br/embora-os-periodos-sejam-parecidos-tratam-de-escolhas-diferentes-por-isso-e-importante-entender-cada-situacao'},
+    {data:'28/09/2026', tipo:'comunicado', nova:true,
+     titulo:'Declaração de Regimes Específicos: CGIBS e Receita Federal divulgam endpoints do ambiente de produção',
+     resumo:'O início da transmissão dos lotes com eventos de tabela para o ambiente de produção deverá ocorrer a partir das 09h00 de 1º de outubro de 2026.',
+     link:'https://www.cgibs.gov.br/dere-cgibs-e-receita-federal-divulgam-endpoints-do-ambiente-de-producao'},
+    {data:'21/09/2026', tipo:'noticia', prazo:true, nova:true,
+     titulo:'Receita Federal e Comitê Gestor do IBS divulgam Orientação Conjunta destinada às sociedades cooperativas',
+     resumo:'Manual explica procedimento para opção pelo regime específico do IBS e da CBS. Pode optar quem estiver enquadrado no art. 271 da LC 214/25, com prazo até 31/10/2026.',
+     link:'https://www.cgibs.gov.br/receita-federal-e-comite-gestor-do-imposto-sobre-bens-e-servicos-divulgam-orientacao-conjunta'},
+    {data:'21/09/2026', tipo:'comunicado',
+     titulo:'Regimes Específicos: veja atualização dos esquemas XSD dos eventos D-1011 e D-1101 na Produção Restrita',
+     resumo:'Ajustes contemplam o PGCC (v.1.0.3) e o Balancete Mensal (v.1.0.1) com expansão do limite de contas.',
+     link:'https://www.cgibs.gov.br/dere-atualizacao-dos-esquemas-xsd-dos-eventos-d-1011-e-d-1101-na-producao-restrita'},
+    {data:'18/09/2026', tipo:'noticia',
+     titulo:'Presidente e segunda vice do CGIBS participam de missão à OCDE em Paris sobre IVA e modernização tributária',
+     resumo:'Comitiva discute experiências que possam contribuir para a implementação do IBS no Brasil.',
+     link:'https://www.cgibs.gov.br/presidente-e-segunda-vice-do-cgibs-participam-de-missao-a-ocde-sobre-iva-e-modernizacao-tributaria'},
+    {data:'14/09/2026', tipo:'noticia', prazo:true,
+     titulo:'Prazo para opção pelo Simples Nacional e do modelo de recolhimento do IBS e da CBS para 2027 termina no dia 30/09',
+     resumo:'Quem já é do Simples Nacional não precisa fazer nova opção para permanecer no regime, salvo se houver registro de exclusão futura.',
+     local:'Atenção: este prazo foi alterado depois pela Resolução CGSN 194 (notícia de 30/09).',
+     substituida:true,
+     link:'https://www.cgibs.gov.br/prazo-para-opcao-pelo-simples-nacional-e-escolha-do-modelo-de-recolhimento-do-ibs-e-da-cbs-em-2027-termina-em-30-de-setembro'}
+  ];
+
+  // Prazos (fonte: notícia CGIBS/RFB de 30/09/2026 — Resolução CGSN 194; cooperativas: notícia de 21/09/2026)
+  const PRAZOS = [
+    {ate:'2026-10-15', titulo:'Entrar ou voltar ao Simples Nacional em 2027', quem:'Micro e pequenas empresas'},
+    {ate:'2026-10-30', titulo:'Optante do Simples escolher IBS/CBS fora do DAS', quem:'Para jan–jun/2027'},
+    {ate:'2026-10-30', titulo:'Regularizar pendências do pedido de opção', quem:'Quem teve o pedido indeferido'},
+    {ate:'2026-10-31', titulo:'Cooperativas: opção pelo regime específico', quem:'Art. 271 da LC 214/2025'}
+  ];
+
+  /* ---------- render ---------- */
+  const TIPO = {noticia:'Notícia', comunicado:'Comunicado oficial', legislacao:'Legislação'};
+  function cardNoticia(n){
+    return `<div class="noticia" data-tipo="${n.tipo}" data-prazo="${!!n.prazo}" data-local="${!!n.local}">
+      <div class="meta"><span class="tag oficial">CGIBS</span><span>${TIPO[n.tipo]}</span><span>· ${n.data}</span>
+        ${n.nova?'<span class="tag erro">nova</span>':''}${n.prazo?'<span class="tag espera">tem prazo</span>':''}${n.substituida?'<span class="tag parado">prazo alterado</span>':''}</div>
+      <h4>${n.titulo}</h4><p>${n.resumo}</p>
+      ${n.local?`<div class="local"><b>O que isso significa para Canindé:</b> ${n.local}</div>`:''}
+      <div class="rodape"><a href="${n.link}" target="_blank" rel="noopener">Ler no site oficial ↗</a>${n.prazo&&!n.substituida?'<a data-ir="artigo">Guia da Secretaria</a>':''}</div>
+    </div>`;
+  }
+  document.getElementById('noticias-home').innerHTML = NOTICIAS.slice(0,3).map(cardNoticia).join('');
+  document.getElementById('noticias-lista').innerHTML = NOTICIAS.map(cardNoticia).join('');
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  document.getElementById('prazos-home').innerHTML = PRAZOS.map(p=>{
+    const d = new Date(p.ate+'T00:00:00'); const dias = Math.round((d-hoje)/864e5);
+    const [a,m,dd] = p.ate.split('-');
+    const cont = dias<0 ? '<div class="dias fim">encerrado</div>'
+               : dias===0 ? '<div class="dias">é hoje</div>'
+               : `<div class="dias">${dias} <small>dia${dias>1?'s':''} restantes</small></div>`;
+    return `<div class="prazo">${cont}<h4>${p.titulo}</h4><p>até ${dd}/${m}/${a} · ${p.quem}</p></div>`;
+  }).join('');
+
+  document.getElementById('monitor-fila').innerHTML = NOTICIAS.map((n,i)=>{
+    const sit = n.nova ? '<span class="tag erro">Nova</span>' : n.local ? '<span class="tag ok">Publicada + explicação</span>' : '<span class="tag azul">Publicada (título e link)</span>';
+    return `<tr data-m="${i}" class="${i===0?'sel':''}"><td>${n.data}</td><td>${n.titulo}</td><td>${sit}</td></tr>`;
+  }).join('');
+  function abrirMonitor(i){
+    const n = NOTICIAS[i];
+    document.getElementById('m-titulo').innerHTML = 'Curadoria ' + (n.nova?'<span class="tag erro">Nova</span>':'<span class="tag ok">Publicada</span>');
+    document.getElementById('m-meta').textContent = 'CGIBS · ' + TIPO[n.tipo] + ' · ' + n.data;
+    document.getElementById('m-texto').textContent = n.titulo;
+    document.getElementById('m-resumo').textContent = n.resumo;
+  }
+  abrirMonitor(0);
+  document.querySelectorAll('#monitor-fila tr').forEach(tr=>tr.addEventListener('click',()=>{
+    document.querySelectorAll('#monitor-fila tr').forEach(x=>x.classList.remove('sel')); tr.classList.add('sel'); abrirMonitor(tr.dataset.m);
+  }));
+
+  /* ---------- navegação ---------- */
+  const telasEquipe = ['adm-monitor','adm-nfse','adm-evento','adm-duvidas','adm-publicar','adm-modulos'];
+  function ir(id){
+    document.querySelectorAll('.tela').forEach(t=>t.classList.toggle('ativa', t.id===id));
+    document.querySelectorAll('.proto button').forEach(b=>b.classList.toggle('ativo', b.dataset.ir===id));
+    const equipe = telasEquipe.includes(id);
+    const nfse = id.startsWith('nfse-');
+    document.getElementById('menu-cidadao').style.display = (equipe||nfse) ? 'none' : '';
+    document.getElementById('menu-nfse').style.display = nfse ? '' : 'none';
+    document.getElementById('menu-equipe').style.display = equipe ? '' : 'none';
+    document.getElementById('topo-acoes').innerHTML = equipe
+      ? '<span class="link">Ana Souza</span><span class="cracha equipe" data-ir="inicio">Equipe técnica · ver portal</span>'
+      : '<span class="link">Acessibilidade</span><span class="link">Libras</span><span class="cracha" data-ir="adm-monitor">Área da equipe</span>';
+    document.querySelectorAll('.menu a[data-ir]').forEach(a=>a.classList.remove('ativo'));
+    const m = document.querySelector('.menu:not([style*="none"]) a[data-ir="'+id+'"]'); if(m) m.classList.add('ativo');
+    window.scrollTo(0,0);
+  }
+  document.addEventListener('click', e=>{
+    const alvo = e.target.closest('[data-ir]');
+    if(alvo){ e.preventDefault(); ir(alvo.dataset.ir); }
+  });
+  ir('inicio');
+
+  /* ---------- filtros ---------- */
+  document.getElementById('filtro-noticias').addEventListener('click', e=>{
+    if(!e.target.dataset.f) return;
+    const f = e.target.dataset.f;
+    document.querySelectorAll('#filtro-noticias .chip').forEach(x=>x.classList.toggle('ativo', x===e.target));
+    document.querySelectorAll('#noticias-lista .noticia').forEach(n=>{
+      const ok = f==='todos' || n.dataset.tipo===f || (f==='prazo' && n.dataset.prazo==='true') || (f==='local' && n.dataset.local==='true');
+      n.style.display = ok ? '' : 'none';
+    });
+  });
+
+  let filtro = 'todos';
+  function filtrarFaq(){
+    const termo = document.getElementById('faq-busca').value.toLowerCase();
+    let vis = 0;
+    document.querySelectorAll('#faq-lista details').forEach(d=>{
+      const ok = (filtro==='todos' || d.dataset.p.includes(filtro)) && d.textContent.toLowerCase().includes(termo);
+      d.style.display = ok ? '' : 'none'; if(ok) vis++;
+    });
+    document.getElementById('faq-vazio').style.display = vis ? 'none' : '';
+  }
+  document.querySelectorAll('#faq-filtros .chip').forEach(c=>c.addEventListener('click',()=>{
+    document.querySelectorAll('#faq-filtros .chip').forEach(x=>x.classList.remove('ativo'));
+    c.classList.add('ativo'); filtro = c.dataset.f; filtrarFaq();
+  }));
+  document.getElementById('faq-busca').addEventListener('input', filtrarFaq);
+
+  document.querySelectorAll('.filtros:not(#faq-filtros):not(#filtro-noticias)').forEach(g=>g.addEventListener('click',e=>{
+    if(!e.target.classList.contains('chip')) return;
+    g.querySelectorAll('.chip').forEach(x=>x.classList.remove('ativo')); e.target.classList.add('ativo');
+  }));
+
+  /* ---------- vídeos: carrega o player do YouTube só ao clicar ---------- */
+  function tocar(el){
+    if(el.querySelector('iframe')) return;
+    el.innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/'+el.dataset.yt+'?autoplay=1&rel=0" title="Vídeo" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+  }
+  document.addEventListener('click', e=>{
+    const v = e.target.closest('.yt'); if(v){ tocar(v); return; }
+    const l = e.target.closest('.yt-link');
+    if(l){
+      const alvo = document.querySelector('.tela.ativa .yt');
+      alvo.dataset.yt = l.dataset.ytAlvo; alvo.innerHTML = ''; tocar(alvo);
+      alvo.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+
+  /* ---------- NFS-e: caminho por perfil ---------- */
+  const ROTAS = {
+    mei:'<b>MEI:</b><ol><li>Faça o primeiro acesso (pode ser pela conta gov.br prata ou ouro).</li><li>Em Configurações, preencha e-mail e telefone.</li><li>Cadastre seus <b>serviços favoritos</b>.</li><li>Emita pela <b>Emissão Simplificada</b> ou pelo aplicativo NFS-e Mobile.</li></ol>',
+    empresa:'<b>Empresa:</b><ol><li>Faça o primeiro acesso com o CNPJ (usuário e senha ou certificado digital).</li><li>Confirme com o contador o <b>Código de Tributação Nacional</b> de cada serviço e as retenções.</li><li>Emita pela <b>Emissão Completa</b>.</li><li>Combine com o contador quem vai emitir e conferir as notas.</li></ol>',
+    autonomo:'<b>Autônomo (CPF):</b><ol><li>Faça o primeiro acesso com o CPF: data de nascimento, título de eleitor e, se declarou IR, os recibos dos dois últimos anos.</li><li>Se os dados não baterem, agende o cadastro presencial.</li><li>Emita pela <b>Emissão Completa</b>.</li></ol>',
+    contador:'<b>Contador:</b><ol><li>Peça à Secretaria a lista dos seus clientes que ainda não fizeram o primeiro acesso.</li><li>Defina com cada cliente o código de serviço, o regime e as retenções.</li><li>Inscreva-se no encontro com contadores.</li></ol>',
+    tomador:'<b>Quem recebe notas:</b><ol><li>Faça o primeiro acesso para ver as notas emitidas para você em “NFS-e recebidas”.</li><li><b>Confirme</b> as notas corretas e <b>rejeite</b> as que não reconhece.</li><li>Confira qualquer nota na Consulta Pública pela chave de acesso.</li></ol>'
+  };
+  document.getElementById('perfis').addEventListener('click', e=>{
+    const p = e.target.closest('.perfil'); if(!p) return;
+    document.querySelectorAll('.perfil').forEach(x=>x.classList.toggle('sel', x===p));
+    const r = document.getElementById('rota'); r.innerHTML = ROTAS[p.dataset.rota]; r.style.display = 'block';
+  });
+
+  /* ---------- NFS-e: checklist (guardado só neste aparelho) ---------- */
+  const CHAVE = 'nfse-checklist';
+  let feitos = {};
+  try{ feitos = JSON.parse(localStorage.getItem(CHAVE) || '{}'); }catch(_){ feitos = {}; }
+  function atualizarChecklist(){
+    const itens = document.querySelectorAll('#checklist input');
+    let n = 0;
+    itens.forEach(i=>{ i.checked = !!feitos[i.dataset.k]; i.closest('.item-check').classList.toggle('feito', i.checked); if(i.checked) n++; });
+    document.getElementById('prog-barra').style.width = (n/itens.length*100)+'%';
+    document.getElementById('prog-msg').textContent = n===itens.length
+      ? 'Tudo pronto! Você já pode emitir pelo Emissor Nacional.'
+      : n+' de '+itens.length+' etapas concluídas.';
+  }
+  document.getElementById('checklist').addEventListener('change', e=>{
+    feitos[e.target.dataset.k] = e.target.checked;
+    try{ localStorage.setItem(CHAVE, JSON.stringify(feitos)); }catch(_){}
+    atualizarChecklist();
+  });
+  atualizarChecklist();
+
+  /* ---------- NFS-e: abas dos passos ---------- */
+  document.getElementById('passos-tab').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('#passos-tab button').forEach(x=>x.classList.toggle('ativo', x===b));
+    document.querySelectorAll('.passo-conteudo').forEach(c=>c.classList.toggle('ativo', c.dataset.p===b.dataset.p));
+  });
+  document.getElementById('agendar').addEventListener('click', ()=>{ document.getElementById('agendado').style.display = 'block'; });
+
+  /* ---------- Conexão Empresarial: perguntas da inscrição (nome abreviado, sem contato) ---------- */
+  const EVENTO_TEMAS = [{"id": "geral", "titulo": "O que muda com a reforma, no geral", "resposta": "<p>Os cinco tributos sobre o consumo (PIS, Cofins, IPI, ICMS e ISS) dão lugar a dois: a <b>CBS</b>, federal, e o <b>IBS</b>, de estados e municípios. Também é criado o Imposto Seletivo para produtos prejudiciais à saúde e ao meio ambiente.</p><p>Para a empresa, as mudanças principais são três:</p><ul><li><b>Imposto “por fora”:</b> o valor do IBS e da CBS aparece separado na nota.</li><li><b>Crédito amplo:</b> quase tudo o que a empresa compra gera crédito para abater do imposto devido.</li><li><b>Cobrança no destino:</b> o imposto vai para o município onde está o cliente.</li></ul><p>A mudança é gradual: 2026 é ano de teste, a CBS vale integralmente em 2027, o ICMS e o ISS diminuem de 2029 a 2032 e o sistema novo fica completo em 2033.</p>", "base": "EC 132/2023 · LC 214/2025", "links": [["entenda", "Entenda a reforma"], ["cronograma", "Cronograma"]], "qtd": 8}, {"id": "simples", "titulo": "Simples Nacional e pequenos negócios", "resposta": "<p><b>O Simples Nacional continua.</b> A partir de 2027, o IBS e a CBS entram no DAS no lugar dos tributos antigos.</p><p>A novidade é uma escolha: a empresa do Simples pode recolher o IBS e a CBS <b>por fora do DAS</b>, no regime regular. Assim ela aproveita crédito nas compras e passa crédito integral para o cliente.</p><ul><li>Quem vende mais para <b>outras empresas</b> tende a ganhar com o recolhimento por fora, porque o cliente aproveita o crédito.</li><li>Quem vende mais para o <b>consumidor final</b> costuma ficar melhor no Simples “puro”, que é mais simples.</li></ul><p><b>Prazo para escolher</b> o recolhimento por fora para janeiro a junho de 2027: <b>até 30/10/2026</b>. Dá para desistir de 03/11 a 20/12/2026.</p><p><b>Como se preparar:</b> levante quanto você vende para empresas e quanto vende para consumidor, de quem você compra e qual é a sua margem. Depois simule os dois cenários com o seu contador.</p><p><b>Imposto “descontado direto da venda”:</b> a lei prevê o <i>split payment</i>. Nos pagamentos eletrônicos (cartão, Pix, boleto), a parte do imposto poderá ser separada e enviada direto ao governo no momento do pagamento. A implantação será gradual e ainda depende de regulamentação.</p>", "base": "LC 214/2025 · Resolução CGSN 194 · CGIBS/Receita Federal, 30/09/2026", "links": [["artigo", "Guia: Simples puro ou híbrido"]], "qtd": 4}, {"id": "mei", "titulo": "MEI", "resposta": "<p><b>O MEI continua.</b> O recolhimento segue mensal e em valor fixo, com o mesmo tratamento simplificado, e o MEI não precisa escolher regime.</p><p>Os pontos de atenção são os mesmos de hoje, só que com mais peso:</p><ul><li>emitir nota fiscal (para serviço, pelo Emissor Nacional);</li><li>manter a conta bancária compatível com o que fatura;</li><li>acompanhar o limite anual de faturamento.</li></ul><p><b>Uma empresa maior pode deixar de contratar um MEI porque ele não gera crédito?</b> A escolha de fornecedor é livre, então pode.</p><p>No sistema novo, quem compra aproveita como crédito o IBS e a CBS que o fornecedor de fato recolheu, inclusive quando o fornecedor é do Simples. Como o MEI recolhe valores fixos baixos, o crédito que ele gera é pequeno.</p><p>O que conta para o cliente é o <b>custo líquido</b>: preço menos crédito. Um MEI com preço competitivo continua sendo uma boa opção, principalmente para clientes que vendem ao consumidor final.</p>", "base": "LC 214/2025, art. 47, § 3º (crédito na compra de optante do Simples)", "links": [["nfse-inicio", "Ambiente NFS-e Nacional"]], "qtd": 2}, {"id": "precos", "titulo": "Preços, custos e créditos", "resposta": "<p>Cada empresa vai sentir a reforma de um jeito. Na formação de preço, mudam quatro coisas:</p><ol><li><b>Preço sem imposto + imposto destacado.</b> O IBS e a CBS deixam de estar embutidos no preço.</li><li><b>Crédito amplo.</b> Insumos, energia, aluguel e serviços que a empresa compra geram crédito, desde que o fornecedor tenha recolhido o imposto.</li><li><b>Custo de compra é o custo líquido.</b> O que conta é o preço menos o crédito, e não só o menor preço.</li><li><b>Transição longa.</b> De 2027 a 2032 os dois sistemas convivem, e a carga efetiva muda a cada ano. Revise a precificação todo ano.</li></ol><p><b>Os preços vão mudar em todas as áreas?</b> Não de forma igual:</p><ul><li>a cesta básica nacional tem alíquota zero;</li><li>saúde e educação têm redução de 60%;</li><li>profissões regulamentadas, como advogados, contadores e arquitetos, têm redução de 30%;</li><li>serviços que compram poucos insumos podem ter aumento de carga, porque têm pouco crédito para abater.</li></ul><p><b>Construção civil</b> tem regime específico para operações com imóveis.</p><p><b>E no CPF?</b> O consumidor passa a ver o imposto na nota, e famílias de baixa renda no CadÚnico recebem cashback. A pessoa física com receita abaixo de 50% do limite do MEI (nanoempreendedor) não paga IBS nem CBS.</p>", "base": "LC 214/2025, arts. 26, 47, 112 a 118, 125, 127, 129 e 130", "links": [["entenda", "Entenda a reforma"]], "qtd": 5}, {"id": "servicos", "titulo": "Prestação de serviço e nota fiscal", "resposta": "<p><b>O ISS continua integral até 2028.</b> De 2029 a 2032 ele cai para 90%, 80%, 70% e 60%, e em 2033 é extinto, enquanto o IBS sobe na mesma proporção. Algumas atividades terão alíquota reduzida, como saúde, educação e profissões regulamentadas.</p><p><b>Nota fiscal:</b> a NFS-e segue o padrão nacional. Em Canindé, as empresas do Simples Nacional vão passar a emitir pelo Emissor Nacional.</p><p><b>Recolher por dentro ou por fora?</b> Depende de quanto o cliente valoriza o crédito: vendas para empresas favorecem recolher por fora, vendas ao consumidor favorecem ficar por dentro. Simule margem, preço e caixa nos dois cenários antes de 30/10/2026.</p><p><b>Preenchimento da NFS-e a partir de 01/01/2027:</b> o leiaute nacional já tem campos para IBS e CBS. As regras de preenchimento para 2027 seguem as notas técnicas da NFS-e nacional, e a Secretaria vai publicar a orientação para Canindé quando elas forem definidas.</p>", "base": "EC 132/2023 · LC 214/2025 · Guia do Emissor Nacional v1.2", "links": [["nfse-inicio", "Ambiente NFS-e Nacional"], ["artigo", "Guia do Simples"]], "qtd": 3}, {"id": "exterior", "titulo": "Operações com o exterior", "resposta": "<p><b>Exportação de bens e de serviços é imune</b> ao IBS e à CBS, e o exportador continua aproveitando os créditos do que comprou para exportar.</p><p>Na <b>importação</b>, bens e serviços passam a pagar IBS e CBS, para igualar a carga com o produto nacional.</p><p>Para contratos em andamento com empresas de outros países, vale revisar as cláusulas de preço e de tributos com o seu contador ou advogado.</p>", "base": "LC 214/2025, art. 79", "links": [], "qtd": 1}, {"id": "incompleta", "titulo": "Pergunta incompleta", "resposta": "<p>A pergunta chegou cortada no formulário de inscrição. A equipe vai entrar em contato com o participante para entender a dúvida.</p>", "base": "", "links": [], "qtd": 1}];
+  const EVENTO_PERGUNTAS = [{"nome": "Participante 1", "segmento": "Serviços", "pergunta": "Quais serão as mudanças", "tema": "geral"}, {"nome": "Participante 2", "segmento": "Comércio", "pergunta": "Quais os impactos pra quem está no simples nacional", "tema": "simples"}, {"nome": "Participante 3", "segmento": "Serviços", "pergunta": "Como será para prestação de serviço?", "tema": "servicos"}, {"nome": "Participante 4", "segmento": "Comércio", "pergunta": "Pra quem trabalhava no", "tema": "incompleta"}, {"nome": "Participante 5", "segmento": "Comércio", "pergunta": "Como vai funcionar o MEI nessa reforma?", "tema": "mei"}, {"nome": "Participante 6", "segmento": "Serviços", "pergunta": "Onde toda a mudança da reforma vai empacotar na minha empresa. Desde a precificação do meu serviço aos custos.", "tema": "precos"}, {"nome": "Participante 7", "segmento": "Contabilidade", "pergunta": "Como optar pelo melhor tipo de recolhimento do IBS e CBS, por dentro ou por fora. E quais mudanças no preenchimento das notas fiscais de serviços a partir de 01/01/2027", "tema": "servicos"}, {"nome": "Participante 8", "segmento": "Tecnologia", "pergunta": "Todas.", "tema": "geral"}, {"nome": "Participante 9", "segmento": "Outro", "pergunta": "Reforma tributária", "tema": "geral"}, {"nome": "Participante 10", "segmento": "Serviços", "pergunta": "Reais Impactos no CNPJ e no CPF.", "tema": "precos"}, {"nome": "Participante 11", "segmento": "Serviços", "pergunta": "CBS e IBS", "tema": "geral"}, {"nome": "Participante 12", "segmento": "Contabilidade", "pergunta": "IBS e CBS", "tema": "geral"}, {"nome": "Participante 13", "segmento": "Serviços", "pergunta": "Pode uma empresa de regime maior, escolher não fazer serviço de um MEI, por não ter para ela benefícios fiscais com a Reforma Tributária?", "tema": "mei"}, {"nome": "Participante 14", "segmento": "Serviços", "pergunta": "Como isso vai impactar diretamente o meu ramo?", "tema": "precos"}, {"nome": "Participante 15", "segmento": "Serviços", "pergunta": "Como isso interferirá nas transações internacionais, e contratos com outros países?", "tema": "exterior"}, {"nome": "Participante 16", "segmento": "Outro", "pergunta": "Tudo", "tema": "geral"}, {"nome": "Participante 17", "segmento": "Outro", "pergunta": "Emissão de notas", "tema": "servicos"}, {"nome": "Participante 18", "segmento": "Contabilidade", "pergunta": "Qual o impacto da reforma nas pequenas e médias empresas e como elas podem se adequar nesse novo cenário?", "tema": "simples"}, {"nome": "Participante 19", "segmento": "Outro", "pergunta": "A princípio estamos, acredito quase todos com dúvidas em tudo, principalmente na questão de impostos, os descontos direto da venda, a questão do simples nacional. Enfim, são diversas dúvidas.", "tema": "simples"}, {"nome": "Participante 20", "segmento": "Comércio", "pergunta": "as novas regras que estão por vir", "tema": "geral"}, {"nome": "Participante 21", "segmento": "Outro", "pergunta": "Entender mais", "tema": "geral"}, {"nome": "Participante 22", "segmento": "Construção civil", "pergunta": "o impacto real da nova mecânica de créditos e da alíquota efetiva sobre as cadeias produtivas durante o longo período de transição", "tema": "precos"}, {"nome": "Participante 23", "segmento": "Outro", "pergunta": "A nova reforma afetará os preços em todas as áreas?", "tema": "precos"}, {"nome": "Participante 24", "segmento": "Serviços", "pergunta": "Como essa reforma impacta no crescimento de pequenos negocios", "tema": "simples"}];
+  function renderTemas(filtro){
+    document.getElementById('temas-evento').innerHTML = EVENTO_TEMAS
+      .filter(t => t.id !== 'incompleta' && (filtro === 'todos' || t.id === filtro))
+      .map((t, i) => {
+        const citacoes = EVENTO_PERGUNTAS.filter(q => q.tema === t.id && q.pergunta.length > 12).slice(0, 3)
+          .map(q => `<div class="citacao">“${q.pergunta}”<small>participante do segmento ${q.segmento}</small></div>`).join('');
+        const links = t.links.map(l => `<button class="botao peq vazio" data-ir="${l[0]}">${l[1]}</button>`).join('');
+        return `<details class="tema" ${i === 0 || filtro !== 'todos' ? 'open' : ''}>
+          <summary><h3>${t.titulo}</h3><span class="qtd">${t.qtd} pergunta${t.qtd > 1 ? 's' : ''}</span></summary>
+          <div class="corpo-tema">
+            ${citacoes ? '<div class="citacoes">' + citacoes + '</div>' : ''}
+            <div class="resp-rotulo">Resposta da Secretaria de Finanças</div>
+            <div class="resposta-tema">${t.resposta}</div>
+            ${t.base ? '<div class="base">Base oficial: ' + t.base + '</div>' : ''}
+            ${links ? '<div class="links-tema">' + links + '</div>' : ''}
+          </div></details>`;
+      }).join('');
+  }
+  document.getElementById('filtro-temas').innerHTML =
+    '<button class="chip ativo" data-f="todos">Todos os temas</button>' +
+    EVENTO_TEMAS.filter(t => t.id !== 'incompleta').map(t => `<button class="chip" data-f="${t.id}">${t.titulo}</button>`).join('');
+  document.getElementById('filtro-temas').addEventListener('click', e => {
+    if(!e.target.dataset.f) return;
+    document.querySelectorAll('#filtro-temas .chip').forEach(c => c.classList.toggle('ativo', c === e.target));
+    renderTemas(e.target.dataset.f);
+  });
+  renderTemas('todos');
+
+  const NOME_TEMA = Object.fromEntries(EVENTO_TEMAS.map(t => [t.id, t.titulo]));
+  let situacaoEvento = 'rascunho';
+  function renderAdmEvento(filtro){
+    const sit = {rascunho:'<span class="tag espera">Resposta em rascunho</span>', aprovada:'<span class="tag azul">Aprovada</span>', enviada:'<span class="tag ok">Resposta enviada</span>'};
+    document.getElementById('adm-evento-lista').innerHTML = EVENTO_PERGUNTAS
+      .filter(q => filtro === 'todos' || q.tema === filtro)
+      .map(q => `<tr><td>${q.nome}</td><td>${q.segmento}</td><td>${q.pergunta}</td><td>${NOME_TEMA[q.tema]}</td>
+        <td>${q.tema === 'incompleta' ? '<span class="tag erro">Ligar para completar</span>' : sit[situacaoEvento]}</td></tr>`).join('');
+  }
+  document.getElementById('filtro-adm-evento').innerHTML =
+    '<button class="chip ativo" data-f="todos">Todas (' + EVENTO_PERGUNTAS.length + ')</button>' +
+    EVENTO_TEMAS.map(t => `<button class="chip" data-f="${t.id}">${t.titulo} (${t.qtd})</button>`).join('');
+  let filtroAdm = 'todos';
+  document.getElementById('filtro-adm-evento').addEventListener('click', e => {
+    if(!e.target.dataset.f) return;
+    document.querySelectorAll('#filtro-adm-evento .chip').forEach(c => c.classList.toggle('ativo', c === e.target));
+    filtroAdm = e.target.dataset.f; renderAdmEvento(filtroAdm);
+  });
+  document.getElementById('ev-aprovar').addEventListener('click', () => { situacaoEvento = 'aprovada'; renderAdmEvento(filtroAdm); });
+  document.getElementById('ev-enviar').addEventListener('click', () => {
+    situacaoEvento = 'enviada'; renderAdmEvento(filtroAdm);
+    document.getElementById('ev-enviadas').textContent = EVENTO_PERGUNTAS.filter(q => q.tema !== 'incompleta').length;
+  });
+  renderAdmEvento('todos');
+
+  /* ---------- guia ilustrado: ampliar imagem e sumário ---------- */
+  const zoom = document.getElementById('zoom');
+  document.addEventListener('click', e => {
+    const img = e.target.closest('img[data-zoom]');
+    if(img){ zoom.querySelector('img').src = img.src; zoom.querySelector('p').textContent = img.alt; zoom.classList.add('aberto'); return; }
+    if(e.target.closest('#zoom')) zoom.classList.remove('aberto');
+    const s = e.target.closest('.sum-item');
+    if(s){ e.preventDefault(); document.getElementById(s.dataset.ancora).scrollIntoView({behavior:'smooth'}); }
+  });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') zoom.classList.remove('aberto'); });
+
+  document.getElementById('enviar-duvida').addEventListener('click',()=>{
+    document.getElementById('sucesso').style.display='block';
+  });
+
+  /* ---------- caixa de dúvidas ---------- */
+  const perguntas = [
+    ['DUV-00143','erro','Nova','Marcos A. · empresa do Simples · enviada em 29/09/2026 · autorizou publicar','Já sou do Simples. Preciso fazer opção de novo para continuar em 2027?'],
+    ['DUV-00142','erro','Nova','Juliana P. · contadora · enviada em 30/09/2026 · autorizou publicar','Como fica o ISS de obra feita em Canindé por empresa de outro município durante a transição?'],
+    ['DUV-00140','espera','Com Ana','José R. · MEI · enviada em 27/09/2026 · não autorizou publicar','Sou MEI, preciso destacar CBS na nota que emito para a Prefeitura?'],
+    ['DUV-00137','ok','Respondida','Maria L. · cidadã · enviada em 22/09/2026 · autorizou publicar','Quando o IPTU vai mudar por causa da reforma?']
+  ];
+  function abrirPergunta(i){
+    const p = perguntas[i];
+    document.getElementById('q-titulo').innerHTML = p[0]+' <span class="tag '+p[1]+'">'+p[2]+'</span>';
+    document.getElementById('q-quem').textContent = p[3];
+    document.getElementById('q-texto').textContent = p[4];
+  }
+  abrirPergunta(0);
+  document.querySelectorAll('#fila tr').forEach(tr=>tr.addEventListener('click',()=>{
+    document.querySelectorAll('#fila tr').forEach(x=>x.classList.remove('sel')); tr.classList.add('sel'); abrirPergunta(tr.dataset.q);
+  }));
+
+  document.querySelectorAll('.chave').forEach(c=>c.addEventListener('click',()=>c.classList.toggle('on')));
+</script>
+</body>
+</html>
