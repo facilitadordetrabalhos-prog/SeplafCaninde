@@ -15,6 +15,11 @@ export class MailService {
   private transporter: nodemailer.Transporter | null = null;
   private readonly from: string;
 
+  /** true quando há servidor SMTP configurado (e-mails realmente saem). */
+  get ativo(): boolean {
+    return this.transporter !== null;
+  }
+
   constructor(config: ConfigService) {
     const host = config.get<string>('SMTP_HOST');
     this.from = config.get<string>('SMTP_FROM') || 'Secretaria de Finanças de Canindé <nao-responda@localhost>';

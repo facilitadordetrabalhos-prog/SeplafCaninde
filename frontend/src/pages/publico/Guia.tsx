@@ -49,7 +49,7 @@ function LateralPadrao() {
     <div>
       <div className="caixa-lateral">
         <h4>Ficou com alguma dúvida?</h4>
-        <p>Envie sua pergunta à Secretaria de Finanças. Você recebe um protocolo e a resposta por e-mail.</p>
+        <p>Envie sua pergunta à Secretaria de Finanças. Você recebe um protocolo para acompanhar a resposta pelo portal.</p>
         <Link className="botao peq" to="/reforma/perguntas#enviar-duvida" style={{ marginTop: 6 }}>
           Enviar dúvida
         </Link>

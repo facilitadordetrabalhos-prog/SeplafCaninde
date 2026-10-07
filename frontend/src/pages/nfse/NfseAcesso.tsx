@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { api, mensagemErro } from '../../api';
 import { Banner, Externo, Trilha } from '../../components/Comuns';
@@ -108,6 +109,9 @@ function FormAgendamento() {
           </select>
         </div>
       </div>
+      <p className="aviso-privacidade">
+        Seus dados são usados só para este atendimento. <Link to="/privacidade">Aviso de privacidade</Link>
+      </p>
       <button className="botao preto" type="submit" disabled={enviando || !!mensagem}>
         {enviando ? 'Agendando…' : 'Agendar'}
       </button>

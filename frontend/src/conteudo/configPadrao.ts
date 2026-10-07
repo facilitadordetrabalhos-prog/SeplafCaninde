@@ -20,6 +20,7 @@ export const CONFIG_PADRAO: ConfigPublica = {
     prazoSubstituicaoDias: null,
     prazoCancelamentoDias: null,
   },
+  emailAtivo: false,
   modulos: [],
 };
 

@@ -5,6 +5,7 @@ import { useAuth } from '../../components/AuthContext';
 import { AvisoApi, Banner, Carregando } from '../../components/Comuns';
 import { formatarData, normalizarLinks, useApi } from '../../util';
 import { SITUACAO_DUVIDA } from './Duvidas';
+import { useConfig } from '../../components/ConfigContext';
 
 function linksParaTexto(links: unknown) {
   return normalizarLinks(links)
@@ -94,6 +95,7 @@ function EditorTema({ eventoId, tema, aoSalvar }: { eventoId: number; tema: Tema
 
 export default function Eventos() {
   const { pode } = useAuth();
+  const { config } = useConfig();
   const eventos = useApi(() => admin.eventos());
   const [eventoId, setEventoId] = useState<number | null>(null);
   useEffect(() => {
@@ -196,6 +198,13 @@ export default function Eventos() {
         titulo="Dúvidas de eventos"
         texto="Perguntas deixadas na inscrição dos eventos. Classifique por tema, aprove a resposta do tema e envie a resposta a cada participante por e-mail."
       />
+      {!config.emailAtivo && (
+        <div className="aviso-equipe" role="note">
+          ⚠ O envio de e-mail ainda não está configurado no servidor: as respostas <b>não chegam</b> à caixa de e-mail do cidadão.
+          Elas ficam disponíveis para consulta no portal, com o número do protocolo e o e-mail usado na pergunta.
+        </div>
+      )}
+
       {eventos.carregando && !eventos.dados ? (
         <Carregando />
       ) : eventos.erro ? (

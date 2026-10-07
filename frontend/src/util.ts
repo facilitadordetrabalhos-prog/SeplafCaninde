@@ -66,6 +66,8 @@ export const ROTULO_TIPO_NOTICIA: Record<string, string> = {
   noticia: 'Notícia',
   comunicado: 'Comunicado oficial',
   legislacao: 'Legislação',
+  video: 'Vídeo',
+  material: 'Guia / cartilha',
 };
 
 /** Links dos temas do evento guardam ids de telas do protótipo; aqui viram rotas reais. */

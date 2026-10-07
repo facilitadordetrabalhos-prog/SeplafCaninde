@@ -17,6 +17,7 @@ export class PublicoController {
     @InjectRepository(ServicoOnline) private readonly servicos: Repository<ServicoOnline>,
     @InjectRepository(Prazo) private readonly prazos: Repository<Prazo>,
     @InjectRepository(Conteudo) private readonly conteudos: Repository<Conteudo>,
+    private readonly mail: MailService,
   ) {}
 
   @Get('config/publica')
@@ -31,7 +32,12 @@ export class PublicoController {
       prazoCancelamentoDias: nfseCfg.prazoCancelamentoDias ?? null,
     };
     const modulos = await this.modulos.find({ where: { publico: true }, order: { chave: 'ASC' } });
-    return { contatos, nfse, modulos: modulos.map((m) => ({ chave: m.chave, nome: m.nome, ativo: m.ativo })) };
+    return {
+      contatos,
+      nfse,
+      emailAtivo: this.mail.ativo,
+      modulos: modulos.map((m) => ({ chave: m.chave, nome: m.nome, ativo: m.ativo })),
+    };
   }
 
   @Get('servicos')
@@ -141,10 +147,18 @@ export class DuvidasPublicasController {
     return { protocolo: d.protocolo };
   }
 
+  /**
+   * Situação do protocolo. A resposta só é devolvida a quem informa o mesmo e-mail usado na pergunta
+   * (protocolos são sequenciais; sem o e-mail, ninguém lê a resposta de outra pessoa).
+   */
   @Get('protocolo/:protocolo')
-  async consultar(@Param('protocolo') protocolo: string) {
+  async consultar(@Param('protocolo') protocolo: string, @Query('email') email?: string) {
     const d = await this.duvidas.findOne({ where: { protocolo: protocolo.trim().toUpperCase() } });
     if (!d) throw new NotFoundException('Protocolo não encontrado.');
-    return { protocolo: d.protocolo, status: d.status, criadoEm: d.criadoEm, respondidoEm: d.respondidoEm };
+    const base = { protocolo: d.protocolo, status: d.status, criadoEm: d.criadoEm, respondidoEm: d.respondidoEm };
+    const emailConfere = !!email && email.trim().toLowerCase() === (d.email ?? '').trim().toLowerCase();
+    const respondida = d.status === 'respondida' || d.status === 'publicada';
+    if (!emailConfere) return { ...base, emailConfere: false };
+    return { ...base, emailConfere: true, resposta: respondida ? d.resposta : null, baseOficial: respondida ? d.baseOficial : null };
   }
 }

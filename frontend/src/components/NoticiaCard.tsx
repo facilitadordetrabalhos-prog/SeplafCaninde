@@ -9,7 +9,7 @@ export function NoticiaCard({ n }: { n: NoticiaOficial }) {
       <div className="meta">
         <span className="tag oficial">CGIBS</span>
         <span>{ROTULO_TIPO_NOTICIA[n.tipo] ?? n.tipo}</span>
-        <span>· {formatarData(n.data)}</span>
+        {n.data && <span>· {formatarData(n.data)}</span>}
         {n.nova && <span className="tag erro">nova</span>}
         {n.temPrazo && <span className="tag espera">tem prazo</span>}
         {n.prazoAlterado && <span className="tag parado">prazo alterado</span>}

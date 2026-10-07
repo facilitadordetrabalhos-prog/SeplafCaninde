@@ -12,17 +12,14 @@ export function QuadroPrazos({ prazos, erro, carregando }: { prazos: Prazo[] | n
   }, []);
 
   const lista = prazos ?? [];
-  const fonte = lista.find((p) => p.fonte)?.fonte;
 
   return (
     <div className="prazos">
       <div className="prazos-cab">
         <h3>⏰ Prazos que estão correndo</h3>
-        {fonte && (
-          <Link className="tag oficial" to="/reforma/noticias" style={{ whiteSpace: 'normal' }}>
-            Fonte: {fonte}
-          </Link>
-        )}
+        <Link className="tag oficial" to="/reforma/noticias" style={{ whiteSpace: 'normal' }}>
+          Ver as notícias oficiais
+        </Link>
       </div>
       {carregando && !prazos ? (
         <p className="carregando">Carregando prazos…</p>
@@ -52,6 +49,7 @@ export function QuadroPrazos({ prazos, erro, carregando }: { prazos: Prazo[] | n
                   até {formatarData(p.ate)}
                   {p.quem ? ` · ${p.quem}` : ''}
                 </p>
+                {p.fonte && <p className="prazo-fonte">Fonte: {p.fonte}</p>}
               </div>
             );
           })}

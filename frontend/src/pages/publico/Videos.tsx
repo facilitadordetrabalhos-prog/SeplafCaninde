@@ -1,6 +1,9 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../../api';
 import { Banner, Externo, Trilha } from '../../components/Comuns';
+import { NoticiaCard } from '../../components/NoticiaCard';
+import { useApi } from '../../util';
 import { VideoCard } from '../../components/Yt';
 import { PDF_EBOOK_SEBRAE, PDF_GUIA_OFICIAL } from '../../conteudo/links';
 
@@ -143,13 +146,15 @@ function Cartao({ item }: { item: Item }) {
 
 export default function Videos() {
   const [filtro, setFiltro] = useState('todos');
+  const doCgibs = useApi(() => api.noticias({ tipo: 'video,material' }));
+  const listaCgibs = (doCgibs.dados ?? []).filter((n) => filtro === 'todos' || (filtro === 'cgibs' ? true : filtro === 'pdf' && n.tipo === 'material'));
   const lista = ITENS.filter((i) => filtro === 'todos' || i.cats.includes(filtro as Cat));
   return (
     <>
       <Banner
         icone="video"
         titulo="Vídeos e materiais"
-        texto="Palestras realizadas pela Secretaria em Canindé, vídeos oficiais do CGIBS e cartilhas para baixar."
+        texto="Vídeos do Sebrae e do Comitê Gestor do IBS, guias e cartilhas oficiais e o material da palestra realizada em Canindé."
       />
       <Trilha itens={[['Início', '/'], 'Reforma Tributária', 'Vídeos e materiais']} />
       <div className="filtros" role="group" aria-label="Filtrar materiais">
@@ -179,6 +184,17 @@ export default function Videos() {
           <Cartao item={i} key={i.titulo} />
         ))}
       </div>
+      {listaCgibs.length > 0 && (
+        <>
+          <h2 className="secao">Publicados pelo Comitê Gestor do IBS</h2>
+          <p className="sub">Vídeos, guias e cartilhas do site oficial cgibs.gov.br, atualizados automaticamente.</p>
+          <div className="noticias">
+            {listaCgibs.map((n) => (
+              <NoticiaCard n={n} key={n.id} />
+            ))}
+          </div>
+        </>
+      )}
     </>
   );
 }

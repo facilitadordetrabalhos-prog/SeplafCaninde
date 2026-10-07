@@ -32,6 +32,7 @@ import Noticias from './pages/publico/Noticias';
 import Perguntas from './pages/publico/Perguntas';
 import Servicos from './pages/publico/Servicos';
 import Videos from './pages/publico/Videos';
+import Privacidade from './pages/publico/Privacidade';
 
 function NaoEncontrada() {
   return (
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="reforma/videos" element={<Videos />} />
             <Route path="servicos" element={<Servicos />} />
             <Route path="eventos/:slug" element={<Evento />} />
+            <Route path="privacidade" element={<Privacidade />} />
             <Route path="nfse" element={<NfseInicio />} />
             <Route path="nfse/primeiro-acesso" element={<NfseAcesso />} />
             <Route path="nfse/emitir" element={<NfseEmitir />} />

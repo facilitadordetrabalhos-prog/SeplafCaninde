@@ -10,9 +10,26 @@ import { agoraIso, normalizar } from '../common/util';
 import { NoticiaOficial, TipoNoticia } from '../entities';
 
 const BASE = 'https://www.cgibs.gov.br';
-const FONTE =
-  `${BASE}/_service/conteudo/pagedlistfilho?id=104&templatename=pagina.listanoticias.cards&currentPage=1&pageSize=20` +
-  '&fields%5B%5D=Titulo&fields%5B%5D=TituloCurto&fields%5B%5D=Texto&form%5Bordem%5D=RECENTES';
+
+/**
+ * Seções do site do CGIBS lidas pelo portal (mesmo serviço de listagem, ids diferentes).
+ * `tipo: null` = tipo deduzido do título (notícias). Leis e resoluções ficam de fora enquanto
+ * as páginas do CGIBS estiverem vazias/"em construção".
+ */
+const FONTES: { nome: string; id: number; template: string; tamanho: number; tipo: TipoNoticia | null }[] = [
+  { nome: 'notícias', id: 104, template: 'pagina.listanoticias.cards', tamanho: 20, tipo: null },
+  { nome: 'comunicados oficiais', id: 149, template: 'pagina.listapagina.cards.fullheader', tamanho: 20, tipo: 'comunicado' },
+  { nome: 'vídeos', id: 174, template: 'pagina.listapagina.cards.fullheader', tamanho: 20, tipo: 'video' },
+  { nome: 'guias', id: 147, template: 'pagina.listapagina.cards.fullheader', tamanho: 20, tipo: 'material' },
+  { nome: 'cartilhas', id: 148, template: 'pagina.listapagina.cards.fullheader', tamanho: 20, tipo: 'material' },
+];
+
+function urlFonte(f: (typeof FONTES)[number]): string {
+  return (
+    `${BASE}/_service/conteudo/pagedlistfilho?id=${f.id}&conteudopai=${f.id}&templatename=${f.template}` +
+    `&currentPage=1&pageSize=${f.tamanho}&fields%5B%5D=Titulo&fields%5B%5D=TituloCurto&fields%5B%5D=Texto&form%5Bordem%5D=RECENTES`
+  );
+}
 
 export interface ItemCgibs {
   link: string;
@@ -107,7 +124,7 @@ export class CgibsService implements OnApplicationBootstrap, OnModuleDestroy {
     }
     this.timer = setTimeout(async () => {
       try {
-        if ((await this.noticias.count()) === 0) await this.sincronizar();
+        await this.sincronizar(); // a cada inicialização (deploy) — chave única evita duplicatas
       } catch (e) {
         this.logger.error(`Falha na sincronização inicial: ${(e as Error).message}`);
       }
@@ -123,42 +140,59 @@ export class CgibsService implements OnApplicationBootstrap, OnModuleDestroy {
     return c?.ultimaVerificacao ?? null;
   }
 
-  /** Busca as notícias do CGIBS e grava as inéditas. Nunca lança exceção. */
+  /** Busca notícias, comunicados, vídeos, guias e cartilhas do CGIBS e grava os inéditos. Nunca lança exceção. */
   async sincronizar(): Promise<ResultadoSync> {
     if (this.executando) {
       return { novas: 0, total: 0, ultimaVerificacao: await this.ultimaVerificacao(), erro: 'Sincronização já em andamento.' };
     }
     this.executando = true;
     try {
-      const resp = await fetch(FONTE, {
-        headers: { Accept: 'application/json', 'User-Agent': 'SeplafCaninde/1.0 (+portal da Secretaria de Financas de Caninde)' },
-        signal: AbortSignal.timeout(30_000),
-      });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const json = (await resp.json()) as { recordcount?: number; body?: string };
-      const itens = parseCgibs(json.body ?? '');
       const cfg = (await this.store.get<any>('cgibs')) ?? {};
       const autoPublicar = cfg.autoPublicarTituloLink !== false;
       let novas = 0;
-      for (const item of itens) {
-        const existe = await this.noticias.count({ where: { link: item.link } });
-        if (existe) continue;
-        const temPrazo = normalizar(`${item.titulo} ${item.resumo ?? ''}`).includes('prazo');
-        await this.noticias.save(
-          this.noticias.create({
-            ...item,
-            tipo: inferirTipo(item.titulo, item.resumo),
-            status: autoPublicar ? 'publicada' : 'nova',
-            publicadaEm: autoPublicar ? agoraIso() : null,
-            temPrazo,
-          }),
-        );
-        novas++;
+      let lidos = 0;
+      const falhas: string[] = [];
+      for (const fonte of FONTES) {
+        let itens: ItemCgibs[];
+        try {
+          const resp = await fetch(urlFonte(fonte), {
+            headers: { Accept: 'application/json', 'User-Agent': 'SeplafCaninde/1.0 (+portal da Secretaria de Financas de Caninde)' },
+            signal: AbortSignal.timeout(30_000),
+          });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          const json = (await resp.json()) as { recordcount?: number; body?: string };
+          itens = parseCgibs(json.body ?? '');
+        } catch (e) {
+          falhas.push(`${fonte.nome}: ${(e as Error).message}`);
+          continue;
+        }
+        lidos += itens.length;
+        for (const item of itens) {
+          const existe = await this.noticias.count({ where: { link: item.link } });
+          if (existe) continue;
+          const temPrazo = normalizar(`${item.titulo} ${item.resumo ?? ''}`).includes('prazo');
+          try {
+            await this.noticias.save(
+              this.noticias.create({
+                ...item,
+                tipo: fonte.tipo ?? inferirTipo(item.titulo, item.resumo),
+                status: autoPublicar ? 'publicada' : 'nova',
+                publicadaEm: autoPublicar ? agoraIso() : null,
+                temPrazo,
+              }),
+            );
+            novas++;
+          } catch {
+            // outro processo do servidor gravou o mesmo link ao mesmo tempo (chave única) — ignorar
+          }
+        }
       }
+      if (falhas.length === FONTES.length) throw new Error(falhas.join('; '));
+      if (falhas.length) this.logger.warn(`Seções não lidas: ${falhas.join('; ')}`);
       const ultimaVerificacao = agoraIso();
       await this.store.merge('cgibs', { ultimaVerificacao });
-      this.logger.log(`Sincronização concluída: ${itens.length} itens lidos, ${novas} novos.`);
-      return { novas, total: itens.length, ultimaVerificacao };
+      this.logger.log(`Sincronização concluída: ${lidos} itens lidos, ${novas} novos.`);
+      return { novas, total: lidos, ultimaVerificacao };
     } catch (e) {
       const msg = (e as Error).message;
       this.logger.error(`Falha ao sincronizar com o CGIBS: ${msg}`);

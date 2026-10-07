@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export const TIPOS_NOTICIA = ['noticia', 'comunicado', 'legislacao'] as const;
+export const TIPOS_NOTICIA = ['noticia', 'comunicado', 'legislacao', 'video', 'material'] as const;
 export type TipoNoticia = (typeof TIPOS_NOTICIA)[number];
 export const STATUS_NOTICIA = ['nova', 'publicada', 'ignorada'] as const;
 export type StatusNoticia = (typeof STATUS_NOTICIA)[number];

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { admin, mensagemErro, type Duvida, type StatusDuvida } from '../../api';
 import { AvisoApi, Banner, Carregando } from '../../components/Comuns';
 import { formatarData, ROTULO_PUBLICO, useApi } from '../../util';
+import { useConfig } from '../../components/ConfigContext';
 
 export const SITUACAO_DUVIDA: Record<StatusDuvida, [string, string]> = {
   nova: ['erro', 'Nova'],
@@ -186,6 +187,7 @@ function Detalhe({
 }
 
 export default function Duvidas() {
+  const { config } = useConfig();
   const [status, setStatus] = useState('');
   const [origem, setOrigem] = useState('');
   const lista = useApi(() => admin.duvidas({ status: status || undefined, origem: origem || undefined }), [status, origem]);
@@ -210,6 +212,13 @@ export default function Duvidas() {
         titulo="Caixa de dúvidas"
         texto="Responda por e-mail e, se for útil para outros, publique como pergunta frequente com a base oficial."
       />
+      {!config.emailAtivo && (
+        <div className="aviso-equipe" role="note">
+          ⚠ O envio de e-mail ainda não está configurado no servidor: as respostas <b>não chegam</b> à caixa de e-mail do cidadão.
+          Elas ficam disponíveis para consulta no portal, com o número do protocolo e o e-mail usado na pergunta.
+        </div>
+      )}
+
       <div className="kpis">
         <div className="kpi">
           <span>Novas (nesta lista)</span>

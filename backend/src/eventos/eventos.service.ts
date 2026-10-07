@@ -57,7 +57,13 @@ export class EventosService {
 
   async listar() {
     const lista = await this.eventos.find({ order: { data: 'DESC', id: 'DESC' } });
-    return Promise.all(lista.map(async (e) => ({ ...e, totalPerguntas: await this.contarPerguntas(e.id) })));
+    return Promise.all(
+      lista.map(async (e) => ({
+        ...e,
+        totalPerguntas: await this.contarPerguntas(e.id),
+        temasPublicados: await this.temas.count({ where: { eventoId: e.id, aprovado: true, chave: Not('incompleta') } }),
+      })),
+    );
   }
 
   async listarPublico() {
@@ -70,6 +76,7 @@ export class EventosService {
       descricao: e.descricao,
       imagemUrl: e.imagemUrl,
       totalPessoas: e.totalPessoas,
+      temasPublicados: e.temasPublicados,
       totalPerguntas: e.totalPerguntas,
     }));
   }

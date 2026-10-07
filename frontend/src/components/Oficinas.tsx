@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { api, ApiError, mensagemErro, type OficinaPublica } from '../api';
 import { diaMes } from '../util';
@@ -68,7 +69,7 @@ function FormInscricao({ oficina, aoConcluir }: { oficina: OficinaPublica; aoCon
   if (ok)
     return (
       <div className="sucesso ver" role="status" style={{ width: '100%' }}>
-        Inscrição confirmada em <b style={{ fontSize: 'inherit' }}>{oficina.titulo}</b>. Você receberá os detalhes por e-mail.
+        Inscrição confirmada em <b style={{ fontSize: 'inherit' }}>{oficina.titulo}</b>. Anote a data, o horário e o local.
       </div>
     );
 
@@ -88,6 +89,9 @@ function FormInscricao({ oficina, aoConcluir }: { oficina: OficinaPublica; aoCon
           <input id={`of-${oficina.id}-tel`} type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} autoComplete="tel" />
         </div>
       </div>
+      <p className="aviso-privacidade">
+        Seus dados são usados só para este atendimento. <Link to="/privacidade">Aviso de privacidade</Link>
+      </p>
       <button className="botao peq" type="submit" disabled={enviando}>
         {enviando ? 'Enviando…' : 'Confirmar inscrição'}
       </button>

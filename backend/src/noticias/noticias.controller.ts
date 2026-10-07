@@ -31,11 +31,19 @@ import { CgibsService } from './cgibs.service';
 
 const SETE_DIAS = 7 * 24 * 60 * 60 * 1000;
 
-/** `nova` = data da notícia (ou da publicação, se não houver data) nos últimos 7 dias. */
+/** `nova` = item com data no CGIBS nos últimos 7 dias (itens sem data, como guias e vídeos, nunca são "novos"). */
 function comNova(n: NoticiaOficial) {
-  const ref = n.data ?? n.publicadaEm;
-  const t = ref ? new Date(ref).getTime() : NaN;
+  const t = n.data ? new Date(n.data).getTime() : NaN;
   return { ...n, nova: !isNaN(t) && Date.now() - t <= SETE_DIAS };
+}
+
+/** Mais recentes primeiro; itens sem data (guias, cartilhas, vídeos) vão para o fim. Igual em qualquer banco. */
+function ordenar(lista: NoticiaOficial[]): NoticiaOficial[] {
+  return [...lista].sort((a, b) => {
+    if (!!a.data !== !!b.data) return a.data ? -1 : 1;
+    if (a.data && b.data && a.data !== b.data) return a.data < b.data ? 1 : -1;
+    return b.id - a.id;
+  });
 }
 
 @Controller('noticias')
@@ -53,13 +61,13 @@ export class NoticiasPublicasController {
     @Query('limite') limite?: string,
   ) {
     const qb = this.repo.createQueryBuilder('n').where('n.status = :s', { s: 'publicada' });
-    if (tipo) qb.andWhere('n.tipo = :tipo', { tipo });
+    const tipos = (tipo ?? '').split(',').map((t) => t.trim()).filter(Boolean);
+    if (tipos.length) qb.andWhere('n.tipo IN (:...tipos)', { tipos });
     if (bool(prazo)) qb.andWhere('n.temPrazo = :tp', { tp: true });
     if (bool(local)) qb.andWhere("n.explicacaoLocal IS NOT NULL AND n.explicacaoLocal <> ''");
-    qb.orderBy('n.data', 'DESC').addOrderBy('n.id', 'DESC');
     const lim = parseInt(limite ?? '', 10);
-    if (lim > 0) qb.take(Math.min(lim, 200));
-    return (await qb.getMany()).map(comNova);
+    const lista = ordenar(await qb.getMany());
+    return (lim > 0 ? lista.slice(0, Math.min(lim, 200)) : lista).map(comNova);
   }
 
   @Get('sincronizacao')
@@ -96,11 +104,8 @@ export class NoticiasAdminController {
 
   @Get()
   async listar(@Query('status') status?: string) {
-    const lista = await this.repo.find({
-      where: status ? { status: status as StatusNoticia } : {},
-      order: { data: 'DESC', id: 'DESC' },
-    });
-    return lista.map(comNova);
+    const lista = await this.repo.find({ where: status ? { status: status as StatusNoticia } : {} });
+    return ordenar(lista).map(comNova);
   }
 
   @Patch(':id')

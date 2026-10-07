@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------- tipos
 
 export type Perfil = 'gestor' | 'editor' | 'equipe';
-export type TipoNoticia = 'noticia' | 'comunicado' | 'legislacao';
+export type TipoNoticia = 'noticia' | 'comunicado' | 'legislacao' | 'video' | 'material';
 export type StatusNoticia = 'nova' | 'publicada' | 'ignorada';
 export type PublicoConteudo = 'todos' | 'mei' | 'empresa' | 'servico' | 'contador' | 'cidadao';
 export type TipoConteudo = 'guia' | 'dica' | 'noticia_local' | 'video' | 'material' | 'faq';
@@ -42,6 +42,8 @@ export interface ModuloPublico {
 export interface ConfigPublica {
   contatos: Contatos;
   nfse: ConfigNfse;
+  /** true quando o servidor de e-mail está configurado (as respostas realmente saem por e-mail). */
+  emailAtivo: boolean;
   modulos: ModuloPublico[];
 }
 
@@ -129,6 +131,10 @@ export interface SituacaoProtocolo {
   status: StatusDuvida;
   criadoEm: string;
   respondidoEm: string | null;
+  /** O e-mail informado confere com o da pergunta (só então vem a resposta). */
+  emailConfere?: boolean;
+  resposta?: string | null;
+  baseOficial?: string | null;
 }
 
 export interface EventoResumo {
@@ -141,6 +147,8 @@ export interface EventoResumo {
   totalPessoas: number;
   totalPerguntas: number;
   totalInscritos?: number;
+  /** Temas com resposta aprovada e publicada na página do evento. */
+  temasPublicados?: number;
 }
 
 export interface LinkTema {
@@ -448,7 +456,8 @@ export function mensagemErro(e: unknown): string {
 export const api = {
   configPublica: () => req<ConfigPublica>('GET', '/config/publica'),
   servicos: () => req<ServicoOnline[]>('GET', '/servicos'),
-  noticias: (p?: { tipo?: TipoNoticia; prazo?: boolean; local?: boolean; limite?: number }) =>
+  /** `tipo` aceita um ou mais tipos separados por vírgula (ex.: 'noticia,comunicado'). */
+  noticias: (p?: { tipo?: string; prazo?: boolean; local?: boolean; limite?: number }) =>
     req<NoticiaOficial[]>('GET', `/noticias${query(p)}`),
   sincronizacao: () => req<{ ultimaVerificacao: string | null }>('GET', '/noticias/sincronizacao'),
   prazos: () => req<Prazo[]>('GET', '/prazos'),
@@ -457,8 +466,11 @@ export const api = {
   conteudo: (slug: string) => req<Conteudo>('GET', `/conteudos/${encodeURIComponent(slug)}`),
   faq: (p?: { publico?: string; q?: string }) => req<ItemFaq[]>('GET', `/faq${query(p)}`),
   enviarDuvida: (d: NovaDuvida) => req<{ protocolo: string }>('POST', '/duvidas', d),
-  consultarProtocolo: (p: string) =>
-    req<SituacaoProtocolo>('GET', `/duvidas/protocolo/${encodeURIComponent(p.trim().toUpperCase())}`),
+  consultarProtocolo: (p: string, email?: string) =>
+    req<SituacaoProtocolo>(
+      'GET',
+      `/duvidas/protocolo/${encodeURIComponent(p.trim().toUpperCase())}${email?.trim() ? `?email=${encodeURIComponent(email.trim())}` : ''}`,
+    ),
   eventos: () => req<EventoResumo[]>('GET', '/eventos'),
   evento: (slug: string) => req<EventoDetalhe>('GET', `/eventos/${encodeURIComponent(slug)}`),
   oficinas: () => req<OficinaPublica[]>('GET', '/nfse/oficinas'),

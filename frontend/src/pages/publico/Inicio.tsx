@@ -11,13 +11,13 @@ const COMECE = [
   { icone: 'livroSimples', titulo: 'Entenda a reforma', texto: 'IBS, CBS, cobrança no destino, nanoempreendedor e cashback, com a base legal de cada ponto.', botao: 'Entender', rota: '/reforma/entenda' },
   { icone: 'grafico', titulo: 'Simples “puro” ou “híbrido”?', texto: 'O guia da decisão de 2027 para micro e pequenas empresas, com os prazos novos.', botao: 'Ler o guia', rota: '/reforma/guias/simples-puro-ou-hibrido' },
   { icone: 'calendario', titulo: 'Cronograma 2026–2033', texto: 'Ano a ano, o que entra em vigor e o que acontece com o ISS de Canindé.', botao: 'Ver cronograma', rota: '/reforma/cronograma' },
-  { icone: 'video', titulo: 'Vídeos e palestras', texto: 'Gravações da Secretaria, vídeos oficiais do CGIBS e materiais das palestras em Canindé.', botao: 'Assistir', rota: '/reforma/videos' },
-  { icone: 'balao', titulo: 'Pergunte à Secretaria', texto: 'Não achou a resposta? Envie sua dúvida e receba um protocolo. A resposta chega por e-mail.', botao: 'Perguntar', rota: '/reforma/perguntas#enviar-duvida', preto: true },
+  { icone: 'video', titulo: 'Vídeos e palestras', texto: 'Vídeos do Sebrae e do Comitê Gestor do IBS, guias e cartilhas oficiais e o material da palestra em Canindé.', botao: 'Assistir', rota: '/reforma/videos' },
+  { icone: 'balao', titulo: 'Pergunte à Secretaria', texto: 'Não achou a resposta? Envie sua dúvida e receba um protocolo para acompanhar a resposta pelo portal.', botao: 'Perguntar', rota: '/reforma/perguntas#enviar-duvida', preto: true },
 ];
 
 const PASSOS = [
-  ['Captura automática', 'O portal lê as notícias, comunicados, legislação e vídeos publicados no site do CGIBS.'],
-  ['Leitura da equipe', 'A Secretaria classifica por público e marca o que tem prazo.'],
+  ['Captura automática', 'A cada 2 horas o portal traz as notícias, comunicados, vídeos, guias e cartilhas publicados no site do CGIBS.'],
+  ['Revisão da equipe', 'A Secretaria revisa o que chegou, indica o público e destaca o que tem prazo.'],
   ['Explicação local', 'Quando afeta Canindé, acrescentamos “o que isso significa para você”.'],
   ['Sempre com a fonte', 'Todo conteúdo mostra a base oficial e o link para o original.'],
 ];
@@ -26,7 +26,7 @@ export default function Inicio() {
   const { config, moduloAtivo } = useConfig();
   const servicos = useApi(() => api.servicos());
   const prazos = useApi(() => api.prazos());
-  const noticias = useApi(() => api.noticias({ limite: 3 }));
+  const noticias = useApi(() => api.noticias({ limite: 3, tipo: 'noticia,comunicado,legislacao' }));
   const sinc = useApi(() => api.sincronizacao());
   const eventos = useApi(() => api.eventos());
 
@@ -117,7 +117,7 @@ export default function Inicio() {
               <div className="caixa-lateral">
                 {verificacao && <span className="sinc">Sincronizado com cgibs.gov.br {verificacao}</span>}
                 <p style={{ margin: verificacao ? '8px 0 0' : 0 }}>
-                  O portal confere o site do Comitê Gestor várias vezes ao dia. Nenhuma notícia oficial fica de fora.
+                  O portal confere o site do Comitê Gestor a cada 2 horas e traz as publicações para cá, sempre com o link para o original.
                 </p>
                 <Link className="botao peq preto" to="/reforma/noticias" style={{ marginTop: 10 }}>
                   Ver todas as notícias
@@ -145,7 +145,7 @@ export default function Inicio() {
         </>
       )}
 
-      {evento && moduloAtivo('eventos') && (
+      {evento && (evento.temasPublicados ?? 0) > 0 && moduloAtivo('eventos') && (
         <Link className="evento-topo" to={`/eventos/${evento.slug}`} style={{ gridTemplateColumns: '110px 1fr' }}>
           <img src={evento.imagemUrl || '/img/conexao-empresarial.webp'} alt={evento.nome} />
           <div>

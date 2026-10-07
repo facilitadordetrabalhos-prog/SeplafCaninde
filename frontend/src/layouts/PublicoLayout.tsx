@@ -145,6 +145,9 @@ function Rodape() {
             Portal de Serviços: <Externo href={c.portalServicosUrl}>{portalSemProtocolo} ↗</Externo>
           </p>
           <p style={{ fontSize: 12 }}>Fontes oficiais da reforma: cgibs.gov.br · gov.br/receitafederal</p>
+          <p style={{ fontSize: 12 }}>
+            <Link to="/privacidade">Aviso de privacidade</Link>
+          </p>
         </div>
       </div>
       <div className="faixa-rodape" aria-hidden="true" />

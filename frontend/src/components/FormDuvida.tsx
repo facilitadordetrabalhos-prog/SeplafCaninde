@@ -1,6 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { api, mensagemErro, type StatusDuvida } from '../api';
 import { formatarData } from '../util';
+import { useConfig } from './ConfigContext';
+import { Link } from 'react-router-dom';
 
 const PERFIS = ['Cidadão', 'MEI', 'Empresa do Simples Nacional', 'Empresa (Lucro Presumido/Real)', 'Contador', 'Servidor público'];
 const ASSUNTOS = ['Simples Nacional 2027', 'ISS e nota de serviço', 'IBS e CBS — geral', 'IPTU e taxas', 'Outro'];
@@ -17,6 +19,7 @@ const PERFIS_NFSE = ['MEI', 'Empresa do Simples Nacional', 'Empresa (Lucro Presu
 /** Formulário "Envie sua dúvida" (portal) ou "Pergunte sobre NFS-e" (origem nfse). */
 export function FormDuvida({ origem = 'portal', titulo, rodape }: { origem?: 'portal' | 'nfse'; titulo: string; rodape?: ReactNode }) {
   const nfse = origem === 'nfse';
+  const { config } = useConfig();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [perfil, setPerfil] = useState(nfse ? PERFIS_NFSE[0] : PERFIS[0]);
@@ -64,7 +67,7 @@ export function FormDuvida({ origem = 'portal', titulo, rodape }: { origem?: 'po
           <input id={`${idp}-nome`} placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} required autoComplete="name" />
         </div>
         <div className="campo">
-          <label htmlFor={`${idp}-email`}>{nfse ? 'E-mail' : 'E-mail (para receber a resposta)'}</label>
+          <label htmlFor={`${idp}-email`}>{config.emailAtivo ? 'E-mail (para receber a resposta)' : 'E-mail (para consultar a resposta)'}</label>
           <input
             id={`${idp}-email`}
             type="email"
@@ -105,6 +108,9 @@ export function FormDuvida({ origem = 'portal', titulo, rodape }: { origem?: 'po
           <input type="checkbox" checked={autoriza} onChange={(e) => setAutoriza(e.target.checked)} /> Autorizo publicar a resposta nas
           perguntas frequentes, sem meu nome.
         </label>
+        <p className="aviso-privacidade">
+          Seus dados são usados só para responder a esta dúvida. <Link to="/privacidade">Aviso de privacidade</Link>
+        </p>
         <button className="botao" type="submit" style={{ width: '100%' }} disabled={enviando}>
           {enviando ? 'Enviando…' : nfse ? 'Enviar' : 'Enviar dúvida'}
         </button>
@@ -115,8 +121,11 @@ export function FormDuvida({ origem = 'portal', titulo, rodape }: { origem?: 'po
         )}
         {protocolo && (
           <div className="sucesso ver" role="status">
-            Dúvida recebida! Seu protocolo é <b>{protocolo}</b>.
-            <br />A resposta chega no seu e-mail em até 5 dias úteis.
+            Dúvida recebida! Seu protocolo é <b>{protocolo}</b>. <b>Anote esse número.</b>
+            <br />
+            {config.emailAtivo
+              ? 'A resposta chega no seu e-mail em até 5 dias úteis. Você também pode consultá-la pelo protocolo.'
+              : 'Em até 5 dias úteis, consulte a resposta em “Acompanhe pelo protocolo”, informando este número e o seu e-mail.'}
           </div>
         )}
         {rodape}
@@ -128,13 +137,14 @@ export function FormDuvida({ origem = 'portal', titulo, rodape }: { origem?: 'po
 const SITUACAO: Record<StatusDuvida, [string, string]> = {
   nova: ['espera', 'Recebida — aguardando a equipe'],
   em_resposta: ['azul', 'Em resposta pela equipe'],
-  respondida: ['ok', 'Respondida — confira o seu e-mail'],
+  respondida: ['ok', 'Respondida'],
   publicada: ['ok', 'Respondida e publicada nas perguntas frequentes'],
   incompleta: ['erro', 'Incompleta — a equipe vai entrar em contato'],
 };
 
 export function ConsultaProtocolo() {
   const [protocolo, setProtocolo] = useState('');
+  const [email, setEmail] = useState('');
   const [resultado, setResultado] = useState<Awaited<ReturnType<typeof api.consultarProtocolo>> | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [buscando, setBuscando] = useState(false);
@@ -146,7 +156,7 @@ export function ConsultaProtocolo() {
     setResultado(null);
     setBuscando(true);
     try {
-      setResultado(await api.consultarProtocolo(protocolo));
+      setResultado(await api.consultarProtocolo(protocolo, email));
     } catch (err) {
       const m = mensagemErro(err);
       setErro(/não encontrad|not found/i.test(m) ? 'Protocolo não encontrado. Confira o número (ex.: DUV-2026-00143).' : m);
@@ -160,13 +170,21 @@ export function ConsultaProtocolo() {
   return (
     <div className="caixa-lateral" id="protocolo" style={{ marginTop: 14 }}>
       <h4>Acompanhe pelo protocolo</h4>
-      <p style={{ margin: 0 }}>Informe o número que você recebeu ao enviar a dúvida.</p>
+      <p style={{ margin: 0 }}>Informe o número do protocolo e o e-mail usado na pergunta para ver a resposta.</p>
       <form className="consulta-protocolo" onSubmit={consultar}>
         <input
           aria-label="Número do protocolo"
           placeholder="DUV-2026-00000"
           value={protocolo}
           onChange={(e) => setProtocolo(e.target.value)}
+        />
+        <input
+          aria-label="E-mail usado na pergunta"
+          type="email"
+          placeholder="seu e-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
         />
         <button className="botao peq preto" type="submit" disabled={buscando} style={{ marginTop: 0 }}>
           {buscando ? 'Consultando…' : 'Consultar'}
@@ -185,6 +203,18 @@ export function ConsultaProtocolo() {
             Enviada em {formatarData(resultado.criadoEm)}
             {resultado.respondidoEm ? ` · respondida em ${formatarData(resultado.respondidoEm)}` : ''}
           </small>
+          {resultado.resposta && (
+            <div className="resposta-protocolo">
+              <div className="resp-rotulo">Resposta da Secretaria de Finanças</div>
+              <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{resultado.resposta}</p>
+              {resultado.baseOficial && <div className="base">Base oficial: {resultado.baseOficial}</div>}
+            </div>
+          )}
+          {(resultado.status === 'respondida' || resultado.status === 'publicada') && !resultado.emailConfere && (
+            <p className="sub" style={{ margin: '8px 0 0' }}>
+              Para ver a resposta, informe também o e-mail usado ao enviar a dúvida.
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -30,6 +30,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
         setConfig({
           contatos: { ...CONFIG_PADRAO.contatos, ...(c.contatos ?? {}) },
           nfse: { ...CONFIG_PADRAO.nfse, ...(c.nfse ?? {}) },
+          emailAtivo: c.emailAtivo === true,
           modulos: Array.isArray(c.modulos) ? c.modulos : [],
         });
       })

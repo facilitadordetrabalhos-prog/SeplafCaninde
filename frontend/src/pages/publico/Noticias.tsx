@@ -9,6 +9,8 @@ const FILTROS: [string, string][] = [
   ['noticia', 'Notícias'],
   ['comunicado', 'Comunicados oficiais'],
   ['legislacao', 'Legislação'],
+  ['video', 'Vídeos'],
+  ['material', 'Guias e cartilhas'],
   ['prazo', 'Só o que tem prazo'],
   ['local', 'Com explicação para Canindé'],
 ];
@@ -41,7 +43,7 @@ export default function Noticias() {
       <Banner
         icone="jornal"
         titulo="Notícias oficiais da Reforma"
-        texto="Tudo o que o Comitê Gestor do IBS publica, no mesmo dia. Com a explicação da Secretaria quando o assunto afeta Canindé."
+        texto="Notícias, comunicados, vídeos, guias e cartilhas do Comitê Gestor do IBS, conferidos a cada 2 horas. Com a explicação da Secretaria quando o assunto afeta Canindé."
       />
       <Trilha itens={[['Início', '/'], 'Reforma Tributária', 'Notícias oficiais']} />
       <div className="filtros" role="group" aria-label="Filtrar notícias">

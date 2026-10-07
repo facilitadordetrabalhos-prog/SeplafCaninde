@@ -133,7 +133,7 @@ export default function Evento() {
 
           <div className="caixa-lateral" style={{ marginTop: 14 }}>
             <h4>Participou do evento e ficou com outra dúvida?</h4>
-            <p>Envie pelo formulário de dúvidas. Você recebe um protocolo e a resposta por e-mail.</p>
+            <p>Envie pelo formulário de dúvidas. Você recebe um protocolo para acompanhar a resposta pelo portal.</p>
             <Link className="botao peq" to="/reforma/perguntas#enviar-duvida">
               Enviar nova dúvida
             </Link>
